@@ -1,6 +1,6 @@
 {
   "name": "fpn-vpn",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "FPN - Freedom Private Network Desktop Application",
   "main": "main.js",
   "author": {
@@ -31,6 +31,10 @@
       "main.js",
       "package.json",
       "client/**/*",
+      "bin/**/*",
+      "scripts/**/*"
+    ],
+    "asarUnpack": [
       "bin/**/*",
       "scripts/**/*"
     ],

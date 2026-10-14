@@ -74,9 +74,16 @@ function switchTab(tabId) {
         renderMobileQr();
     } else if (tabId === 'logs') {
         fetchLogs();
+        if (window.logPollInterval) clearInterval(window.logPollInterval);
+        window.logPollInterval = setInterval(fetchLogs, 1500);
     } else if (tabId === 'settings') {
         fetchSettings();
         checkTunStatus();
+    }
+
+    if (tabId !== 'logs' && window.logPollInterval) {
+        clearInterval(window.logPollInterval);
+        window.logPollInterval = null;
     }
 }
 
@@ -929,12 +936,19 @@ async function fetchLogs() {
         if (data.logs && data.logs.length) {
             terminalOutput.innerText = data.logs.join('\n');
             terminalOutput.scrollTop = terminalOutput.scrollHeight;
+        } else {
+            terminalOutput.innerText = "FPN konsolu hazır. Henüz bir etkinlik kaydedilmedi.\nBağlan butonuna basarak tüneli başlatabilirsiniz.";
         }
-    } catch (e) {}
+    } catch (e) {
+        terminalOutput.innerText = `Konsol bağlantı hatası: ${e.message}`;
+    }
 }
 
-function clearLogs() {
+async function clearLogs() {
     terminalOutput.innerText = "Konsol temizlendi.";
+    try {
+        await fetch(API_BASE + '/api/logs', { method: 'DELETE' });
+    } catch (e) {}
 }
 
 // Modal Node Form

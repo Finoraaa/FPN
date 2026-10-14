@@ -15,12 +15,75 @@ const tls = require('tls');
 const dns = require('dns').promises;
 
 const PORT = 4040;
-const BASE_DIR = path.resolve(__dirname, '..');
-const DATA_DIR = path.join(__dirname, 'data');
 const isWin = process.platform === 'win32';
-const BIN_PATH = path.join(BASE_DIR, 'bin', isWin ? 'sing-box.exe' : 'sing-box');
+const PUBLIC_DIR = path.join(__dirname, 'public');
+const BUNDLED_DATA_DIR = path.join(__dirname, 'data');
+
+// 1. Resolve User Data Directory (Writable location outside app.asar)
+function resolveUserDataDir() {
+    let baseDir = null;
+    try {
+        const { app } = require('electron');
+        if (app && typeof app.getPath === 'function') {
+            baseDir = app.getPath('userData');
+        }
+    } catch (e) {}
+
+    if (!baseDir) {
+        const os = require('os');
+        const home = os.homedir();
+        if (isWin) {
+            baseDir = path.join(process.env.APPDATA || path.join(home, 'AppData', 'Roaming'), 'fpn-vpn');
+        } else if (process.platform === 'darwin') {
+            baseDir = path.join(home, 'Library', 'Application Support', 'fpn-vpn');
+        } else {
+            baseDir = path.join(process.env.XDG_CONFIG_HOME || path.join(home, '.config'), 'fpn-vpn');
+        }
+    }
+
+    const dataDir = path.join(baseDir, 'data');
+    if (!fs.existsSync(dataDir)) {
+        try {
+            fs.mkdirSync(dataDir, { recursive: true });
+        } catch (e) {
+            console.error("DATA_DIR oluşturulamadı:", e);
+        }
+    }
+    return dataDir;
+}
+
+const DATA_DIR = resolveUserDataDir();
 const RUNTIME_CONFIG_PATH = path.join(DATA_DIR, 'runtime_config.json');
-const PROXY_SCRIPT_PATH = path.join(BASE_DIR, 'scripts', 'set-system-proxy.sh');
+
+// 2. Resolve Binary & Script Paths (Packaged extraResources vs Dev)
+function resolveResourcePath(relSubPath) {
+    if (process.resourcesPath) {
+        const candidate = path.join(process.resourcesPath, relSubPath);
+        if (fs.existsSync(candidate)) return candidate;
+    }
+    if (__dirname.includes('app.asar')) {
+        const candidate = path.join(__dirname.replace('app.asar', 'app.asar.unpacked'), '..', relSubPath);
+        if (fs.existsSync(candidate)) return candidate;
+    }
+    const devCandidate = path.resolve(__dirname, '..', relSubPath);
+    if (fs.existsSync(devCandidate)) return devCandidate;
+
+    return devCandidate;
+}
+
+const BIN_PATH = resolveResourcePath(path.join('bin', isWin ? 'sing-box.exe' : 'sing-box'));
+const PROXY_SCRIPT_PATH = resolveResourcePath(path.join('scripts', 'set-system-proxy.sh'));
+
+// Ensure executable permissions on POSIX
+if (!isWin) {
+    try {
+        if (fs.existsSync(BIN_PATH)) fs.chmodSync(BIN_PATH, 0o755);
+    } catch (e) {}
+    try {
+        if (fs.existsSync(PROXY_SCRIPT_PATH)) fs.chmodSync(PROXY_SCRIPT_PATH, 0o755);
+    } catch (e) {}
+}
+
 
 // State
 let singboxProcess = null;
@@ -71,13 +134,25 @@ function getActiveNode() {
 }
 
 // Ensure directories
-if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+try {
+    if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+} catch (e) {}
 
 function getNodes() {
     try {
         const filePath = path.join(DATA_DIR, 'nodes.json');
         if (fs.existsSync(filePath)) {
-            return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+            const content = fs.readFileSync(filePath, 'utf8');
+            if (content && content.trim()) {
+                return JSON.parse(content);
+            }
+        }
+        // Fallback to bundled template nodes
+        const bundledPath = path.join(BUNDLED_DATA_DIR, 'nodes.json');
+        if (fs.existsSync(bundledPath)) {
+            const bundledData = JSON.parse(fs.readFileSync(bundledPath, 'utf8'));
+            saveNodes(bundledData);
+            return bundledData;
         }
     } catch (e) {
         console.error("Error reading nodes:", e.message);
@@ -86,7 +161,12 @@ function getNodes() {
 }
 
 function saveNodes(nodes) {
-    fs.writeFileSync(path.join(DATA_DIR, 'nodes.json'), JSON.stringify(nodes, null, 2), 'utf8');
+    try {
+        if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+        fs.writeFileSync(path.join(DATA_DIR, 'nodes.json'), JSON.stringify(nodes, null, 2), 'utf8');
+    } catch (e) {
+        console.error("Error saving nodes:", e.message);
+    }
 }
 
 function hasTunCapability() {
@@ -111,10 +191,17 @@ function getSettings() {
             }
             return data;
         }
+        // Fallback to bundled settings if exists
+        const bundledPath = path.join(BUNDLED_DATA_DIR, 'settings.json');
+        if (fs.existsSync(bundledPath)) {
+            const bundledData = JSON.parse(fs.readFileSync(bundledPath, 'utf8'));
+            saveSettings(bundledData);
+            return bundledData;
+        }
     } catch (e) {
         console.error("Error reading settings:", e.message);
     }
-    return {
+    const defaults = {
         activeNodeId: "node-fpn-de-frankfurt",
         mixedPort: 2080,
         clashApiPort: 9090,
@@ -125,11 +212,19 @@ function getSettings() {
         dnsServer: "https://1.1.1.1/dns-query",
         webPort: 4040
     };
+    try {
+        saveSettings(defaults);
+    } catch (e) {}
+    return defaults;
 }
 
-
 function saveSettings(settings) {
-    fs.writeFileSync(path.join(DATA_DIR, 'settings.json'), JSON.stringify(settings, null, 2), 'utf8');
+    try {
+        if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+        fs.writeFileSync(path.join(DATA_DIR, 'settings.json'), JSON.stringify(settings, null, 2), 'utf8');
+    } catch (e) {
+        console.error("Error saving settings:", e.message);
+    }
 }
 
 function appendLog(line) {
@@ -741,8 +836,11 @@ async function startVpn(nodeId) {
         let lastError = '';
 
         try {
+            if (!fs.existsSync(BIN_PATH)) {
+                throw new Error(`sing-box çekirdeği bulunamadı: ${BIN_PATH}`);
+            }
             singboxProcess = spawn(BIN_PATH, ['run', '-c', RUNTIME_CONFIG_PATH], {
-                cwd: BASE_DIR
+                cwd: DATA_DIR
             });
         } catch (spawnErr) {
             appendLog(`[HATA] Çekirdek başlatılamadı: ${spawnErr.message}`);
@@ -1650,6 +1748,11 @@ const server = http.createServer(async (req, res) => {
                 return sendJson(200, { logs: recentLogs });
             }
 
+            if (pathname === '/api/logs' && req.method === 'DELETE') {
+                recentLogs = [];
+                return sendJson(200, { success: true });
+            }
+
             if (pathname === '/api/tun/status' && req.method === 'GET') {
                 const settings = getSettings();
                 return sendJson(200, {
@@ -1820,7 +1923,19 @@ process.on('SIGTERM', async () => {
     process.exit(0);
 });
 
+server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+        console.log(`[BİLGİ] Port ${PORT} zaten kullanımda (FPN servisi arka planda aktif).`);
+    } else {
+        console.error("FPN sunucu hatası:", err.message);
+    }
+});
+
 server.listen(PORT, '127.0.0.1', () => {
+    appendLog("🚀 FPN Çekirdek Kontrol Merkezi Başlatıldı.");
+    appendLog(`📂 Veri Deposu: ${DATA_DIR}`);
+    appendLog(`⚙️ sing-box Çekirdeği: ${BIN_PATH}`);
+    appendLog("🛡️ Sistem hazır. Bağlan butonuna basarak tüneli başlatabilirsiniz.");
     console.log(`=======================================================`);
     console.log(`🚀 FPN Desktop Kontrol Merkezi Hazır!`);
     console.log(`🔗 Web Arayüzü: http://127.0.0.1:${PORT}`);

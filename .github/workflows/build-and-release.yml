@@ -62,6 +62,7 @@ jobs:
           tar -xzf sing-box.tar.gz
           cp sing-box-*/sing-box bin/sing-box
           chmod +x bin/sing-box
+          chmod +x scripts/*.sh 2>/dev/null || true
           rm -rf sing-box.tar.gz sing-box-*
 
       - name: Setup sing-box core (Linux)
@@ -75,6 +76,7 @@ jobs:
             rm -rf sing-box.tar.gz sing-box-*
           fi
           chmod +x bin/sing-box
+          chmod +x scripts/*.sh 2>/dev/null || true
 
       # Build Electron Distributable Packages
       - name: Build Electron App
