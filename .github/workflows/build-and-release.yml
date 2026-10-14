@@ -1,0 +1,134 @@
+name: Build & Release FPN Multi-Platform
+
+on:
+  workflow_dispatch: # Allows manual trigger from GitHub Actions tab
+  push:
+    tags:
+      - 'v*' # Triggers automatically when a tag like v1.0.0 is pushed
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }} (${{ matrix.platform }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            platform: win
+          - os: ubuntu-latest
+            platform: linux
+          - os: macos-latest
+            platform: mac
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm install
+
+      # Prepare Platform-Specific sing-box core
+      - name: Setup sing-box core (Windows)
+        if: matrix.platform == 'win'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path bin
+          Invoke-WebRequest -Uri "https://github.com/SagerNet/sing-box/releases/download/v1.10.7/sing-box-1.10.7-windows-amd64.zip" -OutFile "sing-box.zip"
+          Expand-Archive -Path "sing-box.zip" -DestinationPath "temp_sb" -Force
+          Copy-Item -Path "temp_sb\*\sing-box.exe" -Destination "bin\sing-box.exe" -Force
+          Remove-Item -Recurse -Force "sing-box.zip", "temp_sb"
+
+      - name: Setup sing-box core (macOS)
+        if: matrix.platform == 'mac'
+        run: |
+          mkdir -p bin
+          curl -sL "https://github.com/SagerNet/sing-box/releases/download/v1.10.7/sing-box-1.10.7-darwin-universal.tar.gz" -o sing-box.tar.gz
+          tar -xzf sing-box.tar.gz
+          cp sing-box-*/sing-box bin/sing-box
+          chmod +x bin/sing-box
+          rm -rf sing-box.tar.gz sing-box-*
+
+      - name: Setup sing-box core (Linux)
+        if: matrix.platform == 'linux'
+        run: |
+          mkdir -p bin
+          if [ ! -f bin/sing-box ]; then
+            curl -sL "https://github.com/SagerNet/sing-box/releases/download/v1.10.7/sing-box-1.10.7-linux-amd64.tar.gz" -o sing-box.tar.gz
+            tar -xzf sing-box.tar.gz
+            cp sing-box-*/sing-box bin/sing-box
+            rm -rf sing-box.tar.gz sing-box-*
+          fi
+          chmod +x bin/sing-box
+
+      # Build Electron Distributable Packages
+      - name: Build Electron App
+        run: npx electron-builder --${{ matrix.platform }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Upload Artifacts for Release
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: fpn-${{ matrix.platform }}
+          path: |
+            dist/*.exe
+            dist/*.AppImage
+            dist/*.deb
+            dist/*.dmg
+            dist/*.zip
+          if-no-files-found: warn
+
+  package-extension:
+    name: Package Web Extension
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Zip Web Extension
+        run: |
+          mkdir -p dist
+          cd extension && zip -r ../dist/fpn-web-extension.zip ./* && cd ..
+
+      - name: Upload Extension Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fpn-web-extension
+          path: dist/fpn-web-extension.zip
+
+  release:
+    name: Create GitHub Release
+    needs: [build, package-extension]
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+          merge-multiple: true
+
+      - name: Display Release Files
+        run: ls -la release-assets/
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-assets/*
+          generate_release_notes: true
+          name: FPN Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

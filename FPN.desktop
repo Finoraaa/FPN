@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=FPN - Freedom VPN
+Comment=Sansürsüz ve Tamamen Ücretsiz Masaüstü VPN Uygulaması
+Exec=/home/furkand/Masaüstü/My vpn/run.sh
+Path=/home/furkand/Masaüstü/My vpn
+Icon=security-high
+Terminal=false
+Categories=Network;Security;
+StartupNotify=true

@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FPN - Freedom Private Network | Sansürsüz Özgür İnternet</title>
+    <!-- Google Fonts: Outfit & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <!-- QR Code Generator -->
+    <script src="js/qrcode.min.js"></script>
+</head>
+<body>
+    <!-- Background Ambient Glows -->
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
+    <div class="ambient-glow glow-3"></div>
+
+    <div class="app-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-icon">
+                    <span class="shield-svg">🛡️</span>
+                </div>
+                <div class="brand-text">
+                    <h1>FPN</h1>
+                    <span class="brand-tag">FREEDOM VPN</span>
+                </div>
+            </div>
+
+            <nav class="nav-menu">
+                <button class="nav-btn active" id="tabBtnDashboard" onclick="switchTab('dashboard')">
+                    <span class="icon">⚡</span>
+                    <span class="label">Ana Ekran</span>
+                </button>
+                <button class="nav-btn" id="tabBtnNodes" onclick="switchTab('nodes')">
+                    <span class="icon">🌐</span>
+                    <span class="label">Sunucular</span>
+                </button>
+                <button class="nav-btn" id="tabBtnSpeedtest" onclick="switchTab('speedtest')">
+                    <span class="icon">🚀</span>
+                    <span class="label">Hız Testi</span>
+                </button>
+                <button class="nav-btn" id="tabBtnMobile" onclick="switchTab('mobile')">
+                    <span class="icon">📱</span>
+                    <span class="label">Telefona Aktar</span>
+                </button>
+                <button class="nav-btn" id="tabBtnDonate" onclick="switchTab('donate')">
+                    <span class="icon">💖</span>
+                    <span class="label">Bağış & Destek</span>
+                </button>
+                <button class="nav-btn" id="tabBtnSettings" onclick="switchTab('settings')">
+                    <span class="icon">⚙️</span>
+                    <span class="label">Ayarlar & Sansür</span>
+                </button>
+                <button class="nav-btn" id="tabBtnLogs" onclick="switchTab('logs')">
+                    <span class="icon">📜</span>
+                    <span class="label">Canlı Konsol</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="status-summary-card">
+                    <div class="status-indicator-dot" id="sidebarDot"></div>
+                    <div class="status-summary-text">
+                        <span class="status-caption">DURUM</span>
+                        <strong class="status-state" id="sidebarStatusText">Bağlı Değil</strong>
+                    </div>
+                </div>
+                <div class="version-tag">FPN v1.0 • sing-box Core</div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Top Header Bar (Displayed on other tabs) -->
+            <header class="top-header" id="topHeader" style="display: none;">
+                <div class="header-left">
+                    <h2 class="section-title" id="currentSectionTitle">Sunucular & Düğümler</h2>
+                    <p class="section-desc" id="currentSectionDesc">Cloudflare Workers veya VLESS çıkış noktalarınızı yönetin ve test edin</p>
+                </div>
+                <div class="header-right">
+                    <div class="header-badge ping-badge" id="headerPingBadge">
+                        <span class="ping-icon">📶</span>
+                        <span id="headerPingVal">Ping: -- ms</span>
+                    </div>
+                    <div class="header-badge ip-badge">
+                        <span class="shield-check">🔒</span>
+                        <span id="headerProtocolTag">VLESS • TLS 1.3</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- TAB 1: DASHBOARD (MAIN CONNECT SCREEN) -->
+            <section class="tab-panel active" id="panelDashboard">
+                <div class="main-dashboard-wrap">
+                    <!-- Top Status Capsule Badge -->
+                    <div class="status-capsule-badge" id="statusCapsuleBadge">
+                        <span class="status-badge-dot" id="statusBadgeDot"></span>
+                        <span class="status-badge-text" id="statusBadgeText">KORUMA DEVRE DIŞI</span>
+                    </div>
+
+                    <!-- Giant Animated Shield Power Button Center -->
+                    <div class="connect-action-center">
+                        <div class="power-button-container" id="powerButtonContainer">
+                            <div class="cyber-spinner" id="cyberSpinner"></div>
+                            <div class="pulse-ring ring-1" id="pulseRing1"></div>
+                            <div class="pulse-ring ring-2" id="pulseRing2"></div>
+                            <button class="power-btn" id="btnToggleConnect" onclick="toggleConnect()">
+                                <div class="btn-inner-content">
+                                    <div class="power-icon-svg" id="powerIconSvg">
+                                        <svg viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+                                            <line x1="12" y1="2" x2="12" y2="12"></line>
+                                        </svg>
+                                    </div>
+                                    <span class="btn-status-label" id="btnStatusLabel">BAĞLAN</span>
+                                </div>
+                            </button>
+                        </div>
+
+                        <div class="connection-status-meta">
+                            <h3 class="shield-status-heading" id="shieldHeading">GÜVENLİK KAPALI</h3>
+                            <p class="shield-status-sub" id="shieldSub">Güvenli ve sansürsüz internet için bağlanın</p>
+                            <div class="timer-pill" id="timerPill" style="display: none;">
+                                <span class="timer-icon">⏱️</span> Bağlantı Süresi: <span id="uptimeCounter">00:00:00</span>
+                            </div>
+                        </div>
+
+                        <!-- Quick Target Server Switcher Bar -->
+                        <div class="quick-target-selector" onclick="openCountryPickerModal()" title="Sunucu Değiştirmek İçin Tıklayın">
+                            <div class="target-flag-avatar" id="dashTargetFlag">🌐</div>
+                            <div class="target-info">
+                                <span class="target-caption">AKTİF ÇIKIŞ NOKTASI</span>
+                                <strong class="target-name" id="dashTargetName">FPN Cloud (Otomatik - En Düşük Ping)</strong>
+                            </div>
+                            <div class="target-actions">
+                                <span class="quick-ping-badge" id="dashQuickPing">⚡ 42 ms</span>
+                                <span class="switch-chevron">Değiştir ▾</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dashboard Destek Banner'ı -->
+                    <div class="dashboard-donate-banner" onclick="switchTab('donate')">
+                        <div class="donate-banner-content">
+                            <span class="donate-banner-icon">💖</span>
+                            <div class="donate-banner-text">
+                                <strong>FPN'e Destek Olun & Özgür İnterneti Yaşatın</strong>
+                                <span>Geliştiriciye bir kahve ısmarlayarak sunucu altyapısına katkıda bulunun</span>
+                            </div>
+                        </div>
+                        <button class="btn-donate-sm">Destek Ol ➔</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2: NODES MANAGEMENT -->
+            <section class="tab-panel" id="panelNodes">
+                <div class="panel-header-actions">
+                    <div>
+                        <h3>Sunucu Yapılandırması & Düğümler</h3>
+                        <p>Açık kaynaklı VLESS sunucuları ve Cloudflare çıkış noktalarını yönetin, filtreleyin ve test edin.</p>
+                    </div>
+                    <div class="header-action-buttons">
+                        <button class="btn-secondary" onclick="openImportSubModal()">
+                            <span>🌐 Abonelik Ekle</span>
+                        </button>
+                        <button class="btn-secondary" onclick="openCleanIpScannerModal()">
+                            <span>🔍 Clean IP Tara</span>
+                        </button>
+                        <button class="btn-secondary" onclick="testAllNodesPing()" id="btnTestAllNodes">
+                            <span>⚡ Tümünü Test Et</span>
+                        </button>
+                        <button class="btn-secondary" onclick="fetchCommunityNodes()" id="btnFetchCommunity">
+                            <span>🔄 Havuzdan Çek</span>
+                        </button>
+                        <button class="btn-secondary" onclick="openImportVlessModal()">
+                            <span>📋 VLESS Yapıştır</span>
+                        </button>
+                        <button class="btn-primary" onclick="openAddNodeModal()">
+                            <span>➕ Manuel Ekle</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Country Filter Chips & Search Bar -->
+                <div class="nodes-filter-bar">
+                    <div class="search-box-wrap">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="nodeSearchInput" placeholder="Sunucu, ülke veya IP ara..." oninput="filterNodesList()">
+                    </div>
+                    <div class="country-filter-chips" id="nodeFilterChips">
+                        <!-- Populated dynamically with country flags -->
+                    </div>
+                </div>
+
+                <div class="nodes-list-container" id="nodesListContainer">
+                    <!-- Populated dynamically -->
+                </div>
+            </section>
+
+            <!-- TAB: SPEEDTEST (DAHİLİ HIZ TESTİ) -->
+            <section class="tab-panel" id="panelSpeedtest">
+                <div class="speedtest-wrap" style="max-width: 820px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px;">
+                    <div class="settings-card" style="text-align: center; padding: 32px 24px;">
+                        <span class="card-badge" style="background: rgba(56,189,248,0.15); color: #38bdf8; display: inline-block; margin-bottom: 8px;">CLOUDFLARE EDGE SPEEDTEST</span>
+                        <h3 style="font-size: 1.6rem; margin-bottom: 8px;">⚡ Gerçek Zamanlı Tünel Hız Testi</h3>
+                        <p style="color: var(--text-muted); font-size: 0.9rem; max-width: 580px; margin: 0 auto 28px;">
+                            Seçili VLESS çıkış noktanızın ve şifreli tünelinizin indirme bant genişliğini ve ilk bayt gecikmesini doğrudan Cloudflare CDN omurgası üzerinden ölçer.
+                        </p>
+
+                        <div class="speedtest-display-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 30px;">
+                            <!-- Download Speed Card -->
+                            <div class="hero-info-card" style="flex-direction: column; align-items: center; text-align: center; padding: 22px 16px; border-color: rgba(56,189,248,0.3); background: rgba(56,189,248,0.04);">
+                                <span style="font-size: 0.75rem; font-weight: 700; color: #38bdf8; letter-spacing: 1px;">İNDİRME HIZI</span>
+                                <div style="display: flex; align-items: baseline; gap: 4px; margin: 12px 0 4px;">
+                                    <span id="stDownloadMbps" style="font-size: 2.4rem; font-weight: 900; color: #fff;">--</span>
+                                    <span style="font-size: 1rem; font-weight: 700; color: #38bdf8;">Mbps</span>
+                                </div>
+                                <span id="stDownloadMBps" style="font-size: 0.8rem; color: var(--text-muted);">-- MB/s</span>
+                            </div>
+
+                            <!-- Ping Card -->
+                            <div class="hero-info-card" style="flex-direction: column; align-items: center; text-align: center; padding: 22px 16px; border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.04);">
+                                <span style="font-size: 0.75rem; font-weight: 700; color: #10b981; letter-spacing: 1px;">GECİKME (PING)</span>
+                                <div style="display: flex; align-items: baseline; gap: 4px; margin: 12px 0 4px;">
+                                    <span id="stPing" style="font-size: 2.4rem; font-weight: 900; color: #fff;">--</span>
+                                    <span style="font-size: 1rem; font-weight: 700; color: #10b981;">ms</span>
+                                </div>
+                                <span style="font-size: 0.8rem; color: var(--text-muted);">İlk Yanıt Süresi</span>
+                            </div>
+
+                            <!-- Test Data Card -->
+                            <div class="hero-info-card" style="flex-direction: column; align-items: center; text-align: center; padding: 22px 16px; border-color: rgba(255,255,255,0.1);">
+                                <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); letter-spacing: 1px;">TEST VERİSİ</span>
+                                <div style="display: flex; align-items: baseline; gap: 4px; margin: 12px 0 4px;">
+                                    <span style="font-size: 2.4rem; font-weight: 900; color: #fff;">5.0</span>
+                                    <span style="font-size: 1rem; font-weight: 700; color: var(--text-muted);">MB</span>
+                                </div>
+                                <span id="stDuration" style="font-size: 0.8rem; color: var(--text-muted);">Cloudflare Edge Payload</span>
+                            </div>
+                        </div>
+
+                        <button class="btn-primary" id="btnRunSpeedTest" onclick="startSpeedTest()" style="font-size: 1.05rem; padding: 14px 36px; border-radius: 14px; font-weight: 800; box-shadow: 0 0 25px rgba(16,185,129,0.35);">
+                            <span>🚀 Hız Testini Başlat</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 3: MOBILE QR TRANSFER -->
+            <section class="tab-panel" id="panelMobile">
+                <div class="mobile-transfer-grid">
+                    <div class="qr-presentation-card">
+                        <span class="card-badge">MOBİL HIZLI BAĞLANTI</span>
+                        <h3>Telefonunuzdan QR Kodu Tarayın</h3>
+                        <p class="subtitle">Bu QR kod telefonunuzdaki VPN uygulaması tarafından doğrudan okunabilir ve tek tıkla bağlanır.</p>
+
+                        <div class="qr-container-box">
+                            <div id="desktopQrCode"></div>
+                        </div>
+
+                        <div class="vless-code-box">
+                            <input type="text" id="vlessLinkInput" readonly value="vless://..." />
+                            <button class="btn-copy" onclick="copyVlessLink()">📋 Kopyala</button>
+                        </div>
+                    </div>
+
+                    <div class="mobile-instructions-card">
+                        <h3>Telefon Kurulum Adımları</h3>
+
+                        <div class="instruction-tabs">
+                            <button class="sub-tab-btn active" onclick="switchMobileSubTab('android')">🤖 Android</button>
+                            <button class="sub-tab-btn" onclick="switchMobileSubTab('ios')">🍏 iOS (iPhone / iPad)</button>
+                        </div>
+
+                        <div class="sub-tab-content active" id="subTabAndroid">
+                            <ol class="step-list">
+                                <li>Google Play Store'dan ücretsiz <b>v2rayNG</b> veya <b>sing-box</b> uygulamasını yükleyin.</li>
+                                <li>Uygulamayı açın ve sağ üstteki <b>"+" (Ekle)</b> butonuna dokunun.</li>
+                                <li><b>"QR Kodunu Tara"</b> (Scan QR Code) seçeneğini seçip sol taraftaki QR kodu telefonunuzun kamerasıyla taratın.</li>
+                                <li>Eklenen sunucuya dokunun ve alttaki <b>V (Bağlan)</b> butonuna basın!</li>
+                                <li>Artık telefonunuzda da sansürsüz ve tamamen ücretsiz internetiniz aktif!</li>
+                            </ol>
+                        </div>
+
+                        <div class="sub-tab-content" id="subTabIos">
+                            <ol class="step-list">
+                                <li>App Store'dan ücretsiz <b>FoXray</b>, <b>Streisand</b> veya <b>Shadowrocket</b> uygulamasını indirin.</li>
+                                <li>Uygulamayı açın ve sağ üstteki <b>"+"</b> butonuna dokunun.</li>
+                                <li>Kamerayı açarak sol taraftaki QR kodu okutun veya bağlantı kodunu yapıştırın.</li>
+                                <li><b>Connect (Bağlan)</b> butonuna basın ve VPN izinlerini onaylayın!</li>
+                                <li>Instagram, Discord, Twitter ve tüm engelli siteler telefonunuzda anında açılır.</li>
+                            </ol>
+                        </div>
+
+                        <div class="tip-box">
+                            💡 <b>İpucu:</b> Telefonunuz hücresel veride (mobil internet) veya farklı bir Wi-Fi'da olsa bile bu bağlantı Cloudflare Edge üzerinden kesintisiz çalışır.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: DONATE / BAĞIŞ & DESTEK -->
+            <section class="tab-panel" id="panelDonate">
+                <div class="donate-grid">
+                    <!-- Sol Kart: QR Kod ile Hızlı Bağış -->
+                    <div class="donate-qr-card">
+                        <span class="card-badge donate-badge">💖 GELİŞTİRİCİYE DESTEK OL</span>
+                        <h3>QR Kod ile Hızlı Bağış</h3>
+                        <p class="subtitle">Telefonunuzun kamerası veya banka/papara uygulamasıyla aşağıdaki QR kodu taratarak doğrudan donatr.ee üzerinden kolayca bağış yapabilirsiniz.</p>
+
+                        <div class="qr-container-box donate-qr-box">
+                            <img src="img/donate_qr.png" alt="https://donatr.ee/fnora/ QR Kod" id="donateQrImage" class="donate-qr-img" />
+                        </div>
+
+                        <div class="donate-scan-badge">
+                            <span class="pulse-dot"></span>
+                            <span>donatr.ee/fnora • Güvenli Ödeme Altyapısı</span>
+                        </div>
+
+                        <div class="donate-link-box">
+                            <div class="vless-code-box">
+                                <input type="text" id="donateLinkInput" readonly value="https://donatr.ee/fnora/" />
+                                <button class="btn-copy" onclick="copyDonateLink()">📋 Kopyala</button>
+                            </div>
+                            <button class="btn-primary btn-open-browser" onclick="openDonateBrowser(event)">
+                                <span>🚀 Tarayıcıda Aç</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Sağ Kart: Neden Destek Olmalısınız & Güvenli Ödeme -->
+                    <div class="donate-info-card">
+                        <div class="donate-header-meta">
+                            <div class="heart-avatar">☕</div>
+                            <div>
+                                <h3>FPN Özgür İnternet Hareketi</h3>
+                                <p class="subtitle">Herkes için sansürsüz, gizli ve sınırsız internet</p>
+                            </div>
+                        </div>
+
+                        <div class="donate-reasons-list">
+                            <div class="reason-item">
+                                <div class="reason-icon">🚀</div>
+                                <div class="reason-text">
+                                    <strong>Yüksek Hızlı VLESS & CDN Sunucuları</strong>
+                                    <p>Sunucuların aylık bant genişliği, Cloudflare tünelleri ve barındırma maliyetlerini karşılamaya yardımcı olur.</p>
+                                </div>
+                            </div>
+
+                            <div class="reason-item">
+                                <div class="reason-icon">🛡️</div>
+                                <div class="reason-text">
+                                    <strong>%100 Ücretsiz & Sıfır Reklam</strong>
+                                    <p>FPN hiçbir zaman paralı üyelik veya rahatsız edici reklamlar içermez. Tamamen bağımsız ve topluluk odaklıdır.</p>
+                                </div>
+                            </div>
+
+                            <div class="reason-item">
+                                <div class="reason-icon">💻</div>
+                                <div class="reason-text">
+                                    <strong>Sürekli Güncelleme & Yeni Protokoller</strong>
+                                    <p>DPI sansürlerine karşı VLESS Reality, Trojan, sing-box ve Android/iOS mobil güncellemelerini geliştirmemizi sağlar.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="donate-cta-box">
+                            <div class="payment-methods-row">
+                                <span class="pay-chip">💳 Kredi / Banka Kartı</span>
+                                <span class="pay-chip">⚡ Papara</span>
+                                <span class="pay-chip">🔒 256-Bit SSL</span>
+                            </div>
+                            <a href="https://donatr.ee/fnora/" target="_blank" class="donate-direct-btn" onclick="openDonateBrowser(event)">
+                                <span>💖 donatr.ee/fnora Sayfasına Git</span>
+                                <span class="arrow">➔</span>
+                            </a>
+                        </div>
+
+                        <div class="tip-box" style="margin-top: 16px;">
+                            🙏 <b>Teşekkürler:</b> Küçük ya da büyük her katkınız projenin ayakta kalması ve kesintisiz devam etmesi için çok değerlidir!
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 4: SETTINGS & SANSÜR KURALLARI -->
+            <section class="tab-panel" id="panelSettings">
+                <div class="settings-card">
+                    <h3>Gelişmiş Ağ & Sansür Aşma Ayarları</h3>
+                    <p class="subtitle">Yerel portlar, DNS koruması ve sistem yönlendirmelerini özelleştirin.</p>
+
+                    <form id="formSettings" onsubmit="saveSettingsForm(event)">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="settingMixedPort">Yerel Proxy Portu (SOCKS5 & HTTP)</label>
+                                <input type="number" id="settingMixedPort" value="2080" required>
+                                <small>Tarayıcıların ve sistemin bağlandığı yerel port.</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="settingClashApiPort">Clash Hız Gösterge Portu</label>
+                                <input type="number" id="settingClashApiPort" value="9090" required>
+                                <small>Canlı hız ve trafik takibi için REST API portu.</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="settingDnsServer">DNS over HTTPS (DoH) Sunucusu</label>
+                                <select id="settingDnsServer">
+                                    <option value="https://1.1.1.1/dns-query">Cloudflare DNS (1.1.1.1) - Önerilen</option>
+                                    <option value="https://dns.google/dns-query">Google DNS (8.8.8.8)</option>
+                                    <option value="https://dns.quad9.net/dns-query">Quad9 Privacy DNS (9.9.9.9)</option>
+                                </select>
+                                <small>ISP DNS engellerini ve zehirlenmelerini önler.</small>
+                            </div>
+
+                            <div class="form-group tun-box" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 16px; margin: 12px 0;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <label class="checkbox-container" style="margin: 0;">
+                                            <input type="checkbox" id="settingTunMode" onchange="toggleTunMode(this.checked)">
+                                            <span>🛡️ Tam Sistem VPN (TUN Modu - Önerilen)</span>
+                                        </label>
+                                        <p style="font-size: 0.82rem; color: var(--text-muted); margin: 6px 0 0 30px;">
+                                            Tüm tarayıcılar (Zen Browser, Chrome vb.), Discord, oyunlar ve terminal otomatik şifreli tünelden geçer. IP her yerde %100 değişir.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div id="tunCapabilityStatus" style="font-size: 0.82rem; margin-top: 12px; padding: 8px 12px; border-radius: 8px; background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: space-between;">
+                                    <span id="tunCapText">Durum kontrol ediliyor...</span>
+                                    <button type="button" class="btn-sm" id="btnGrantTunCap" onclick="grantTunCapability()" style="display: none; background: #38bdf8; color: #000; font-weight: 700; cursor: pointer;">⚡ Tek Tıkla Yetki Ver</button>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="cyber-switch-card">
+                                    <div class="switch-info">
+                                        <span class="switch-title">🚀 Tarayıcı & Masaüstü Proxy Otomasyonu</span>
+                                        <span class="switch-desc">Zen Browser, Firefox ve masaüstü proxy ayarlarını tünelle otomatik senkronize eder.</span>
+                                    </div>
+                                    <div class="switch-wrapper">
+                                        <input type="checkbox" id="settingAutoProxy" checked>
+                                        <span class="switch-slider"></span>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="cyber-switch-card">
+                                    <div class="switch-info">
+                                        <span class="switch-title">🇹🇷 Türkiye Sitelerini Tünel Dışında Tut (Bölünmüş Tünel)</span>
+                                        <span class="switch-desc">Banka, e-Devlet ve yerel platformlara doğrudan bağlanarak hızlı erişim sağlar.</span>
+                                    </div>
+                                    <div class="switch-wrapper">
+                                        <input type="checkbox" id="settingBypassTr" checked>
+                                        <span class="switch-slider"></span>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="cyber-switch-card">
+                                    <div class="switch-info">
+                                        <span class="switch-title">🛡️ Reklam ve İzleyici Engelleyici (AdBlock)</span>
+                                        <span class="switch-desc">Zararlı reklamları, takip çerezlerini ve telemetry isteklerini çekirdek düzeyinde engeller.</span>
+                                    </div>
+                                    <div class="switch-wrapper">
+                                        <input type="checkbox" id="settingBlockAds" checked>
+                                        <span class="switch-slider"></span>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="cyber-switch-card">
+                                    <div class="switch-info">
+                                        <span class="switch-title">⚡ Otomatik Kopma Koruması (Auto-Failover)</span>
+                                        <span class="switch-desc">Sunucu engellenirse veya tünel yanıt vermezse, listedeki en düşük gecikmeli yedek sunucuya kesintisiz geçer.</span>
+                                    </div>
+                                    <div class="switch-wrapper">
+                                        <input type="checkbox" id="settingAutoFailover" checked>
+                                        <span class="switch-slider"></span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Network Doctor Recovery Box -->
+                        <div class="network-doctor-box" style="margin-top: 18px; padding: 16px; background: rgba(244,63,94,0.06); border: 1px solid rgba(244,63,94,0.25); border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong style="color: #f43f5e; display: flex; align-items: center; gap: 6px; font-size: 0.95rem;">
+                                    <span>🩺 Ağ Doktoru & Acil Sıfırlama</span>
+                                </strong>
+                                <p style="font-size: 0.8rem; color: var(--text-muted); margin: 4px 0 0 0;">
+                                    İnternetiniz takılırsa veya proxy takılı kalırsa tüm ayarları tek tıkla fabrika durumuna sıfırlar.
+                                </p>
+                            </div>
+                            <button type="button" class="btn-secondary" style="border-color: #f43f5e; color: #f43f5e; font-weight: 700;" onclick="triggerNetworkDoctor()">Ağ Ayarlarını Sıfırla</button>
+                        </div>
+
+                        <div class="settings-actions" style="margin-top: 16px;">
+                            <button type="submit" class="btn-primary">💾 Ayarları Kaydet</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- TAB 5: LOGS CONSOLE -->
+            <section class="tab-panel" id="panelLogs">
+                <div class="logs-container">
+                    <div class="logs-header">
+                        <div class="logs-title">
+                            <span class="terminal-dots">
+                                <span class="dot red"></span>
+                                <span class="dot yellow"></span>
+                                <span class="dot green"></span>
+                            </span>
+                            <span>FPN Çekirdek Konsolu (sing-box Live Logs)</span>
+                        </div>
+                        <div class="logs-actions">
+                            <button class="btn-sm" onclick="fetchLogs()">🔄 Yenile</button>
+                            <button class="btn-sm" onclick="clearLogs()">🧹 Temizle</button>
+                        </div>
+                    </div>
+                    <pre class="terminal-body" id="terminalOutput">FPN konsolu hazır...</pre>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- MODAL: YENİ SUNUCU EKLE / DÜZENLE -->
+    <div class="modal-overlay" id="modalAddNode" style="display: none;">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 id="modalNodeTitle">Yeni Sunucu Ekle</h3>
+                <button class="modal-close-btn" onclick="closeAddNodeModal()">✕</button>
+            </div>
+            <form id="formNode" onsubmit="saveNodeForm(event)">
+                <input type="hidden" id="nodeFormId" value="">
+                
+                <div class="form-group">
+                    <label for="nodeFormName">Sunucu Adı (Etiket)</label>
+                    <input type="text" id="nodeFormName" placeholder="Örn: Benim Cloudflare Düğümüm" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="nodeFormServer">Sunucu Adresi / Worker Domain</label>
+                    <input type="text" id="nodeFormServer" placeholder="fpn-node.kullaniciadi.workers.dev" required>
+                    <small>Cloudflare'da oluşturduğunuz Worker adresiniz (https:// olmadan).</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="nodeFormUuid">Gizli UUID Şifresi</label>
+                    <input type="text" id="nodeFormUuid" value="d342d11e-d424-4583-b36e-524ab1f0afa4" required>
+                    <small>worker.js içindeki UUID ile birebir aynı olmalıdır.</small>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="nodeFormPort">Port</label>
+                        <input type="number" id="nodeFormPort" value="443" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="nodeFormCleanIp">Clean IP (Temiz CDN IP - İsteğe Bağlı)</label>
+                        <input type="text" id="nodeFormCleanIp" placeholder="104.16.132.229">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="nodeFormUseCleanIp">
+                        <span class="checkmark"></span>
+                        <span>Doğrudan Clean IP üzerinden bağlan (DPI engellerini deler)</span>
+                    </label>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" onclick="closeAddNodeModal()">İptal</button>
+                    <button type="submit" class="btn-primary">Kaydet & Ekle</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: ÜLKE VE SUNUCU SEÇİMİ (ANA EKRANDAN HIZLI GEÇİŞ) -->
+    <div class="modal-overlay" id="modalCountryPicker" style="display: none;">
+        <div class="modal-box modal-lg">
+            <div class="modal-header">
+                <div>
+                    <h3 id="modalCountryTitle">🌐 Çıkış Ülkesi & Sunucu Seçimi</h3>
+                    <p class="modal-sub">Bağlanmak istediğiniz ülkeyi seçin, tüneliniz anında o ülkeye yönlendirilsin.</p>
+                </div>
+                <button class="modal-close-btn" onclick="closeCountryPickerModal()">✕</button>
+            </div>
+            
+            <div class="country-picker-controls">
+                <div class="search-box-wrap">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="countryPickerSearch" placeholder="Ülke veya şehir ara (Almanya, Hollanda, ABD)..." oninput="filterCountryPickerList()">
+                </div>
+                <button class="btn-sm btn-test-all" onclick="testAllNodesPing()">⚡ Tümünü Test Et</button>
+            </div>
+
+            <div class="country-picker-chips" id="countryPickerChips">
+                <!-- Filter chips rendered dynamically -->
+            </div>
+
+            <div class="country-picker-list" id="countryPickerList">
+                <!-- Country rows rendered dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: VLESS / ABONELİK İÇE AKTAR -->
+    <div class="modal-overlay" id="modalImportVless" style="display: none;">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3>📋 VLESS Kodu veya Abonelik İçe Aktar</h3>
+                <button class="modal-close-btn" onclick="closeImportVlessModal()">✕</button>
+            </div>
+            <form onsubmit="submitImportVless(event)">
+                <div class="form-group">
+                    <label for="importVlessTextarea">VLESS Bağlantı Kodları (Tek veya çoklu metin)</label>
+                    <textarea id="importVlessTextarea" rows="7" placeholder="vless://uuid@host:port?security=reality&...#Almanya&#10;vless://uuid@host:port?type=ws&...#Hollanda" required></textarea>
+                    <small>Açık kaynak havuzlarından veya Telegram'dan kopyaladığınız standart vless:// linklerini buraya yapıştırabilirsiniz.</small>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" onclick="closeImportVlessModal()">İptal</button>
+                    <button type="submit" class="btn-primary" id="btnSubmitImport">📥 İçe Aktar ve Ekle</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: ABONELİK (SUBSCRIPTION URL) İÇE AKTAR -->
+    <div class="modal-overlay" id="modalImportSub" style="display: none;">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3>🌐 Abonelik (Subscription URL) İçe Aktar</h3>
+                <button class="modal-close-btn" onclick="closeImportSubModal()">✕</button>
+            </div>
+            <form onsubmit="submitImportSub(event)">
+                <div class="form-group">
+                    <label for="importSubUrlInput">Abonelik Linki (HTTP/HTTPS)</label>
+                    <input type="url" id="importSubUrlInput" placeholder="https://raw.githubusercontent.com/.../sub" required>
+                    <small>v2ray / VLESS abonelik linkinizi girin. Tüm sunucular otomatik çözümlenip eklenecektir.</small>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" onclick="closeImportSubModal()">İptal</button>
+                    <button type="submit" class="btn-primary" id="btnSubmitSubImport">📥 Sunucuları İndir</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: CLOUDFLARE CLEAN IP TARAYICISI -->
+    <div class="modal-overlay" id="modalCleanIpScanner" style="display: none;">
+        <div class="modal-box modal-lg">
+            <div class="modal-header">
+                <div>
+                    <h3>🔍 Cloudflare Clean IP Tarayıcısı</h3>
+                    <p class="modal-sub">Türkiye'de sansürlenmeyen ve en düşük gecikmeye sahip Cloudflare Anycast IP'lerini bulun ve sunucunuza tek tıkla uygulayın.</p>
+                </div>
+                <button class="modal-close-btn" onclick="closeCleanIpScannerModal()">✕</button>
+            </div>
+            <div style="margin: 12px 0; display: flex; justify-content: space-between; align-items: center;">
+                <span id="cleanIpScanStatus" style="font-size: 0.85rem; color: var(--text-muted);">IP listesi taranmaya hazır.</span>
+                <button class="btn-primary btn-sm" id="btnStartCleanIpScan" onclick="scanCleanIpsAction()">⚡ Şimdi Tara</button>
+            </div>
+            <div id="cleanIpResultsList" style="max-height: 340px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
+                <!-- Dynamically populated with Clean IP rows -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: DNS & WEBRTC SIZINTI TESTİ -->
+    <div class="modal-overlay" id="modalLeakTest" style="display: none;">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div>
+                    <h3>🔒 DNS & IP Sızıntı Teşhisi</h3>
+                    <p class="modal-sub">Gerçek kimliğinizin veya DNS sorgularınızın yerel sağlayıcınıza sızıp sızmadığını denetler.</p>
+                </div>
+                <button class="modal-close-btn" onclick="closeLeakTestModal()">✕</button>
+            </div>
+            <div id="leakTestBody" style="display: flex; flex-direction: column; gap: 14px; margin: 16px 0;">
+                <div class="hero-info-card" style="padding: 14px;">
+                    <div class="hero-info-icon" id="leakFlagEmoji">🌐</div>
+                    <div class="hero-info-text">
+                        <span class="hero-info-label">GÖRÜNEN DIŞ IP</span>
+                        <strong id="leakPublicIp" style="font-size: 1.1rem; color: #fff;">Test ediliyor...</strong>
+                    </div>
+                </div>
+                <div class="tip-box" id="leakSummaryBox">
+                    Veriler doğrulanıyor...
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-primary" onclick="closeLeakTestModal()">Kapat</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast-notification" id="toastNotification"></div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

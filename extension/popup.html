@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FPN - Freedom Private Network</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="popup-container">
+        <!-- Top App Bar -->
+        <header class="popup-header">
+            <div class="header-brand">
+                <div class="brand-logo">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#10b981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    </svg>
+                </div>
+                <div class="brand-info">
+                    <strong>FPN</strong>
+                    <span>Freedom Network</span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <a href="https://donatr.ee/fnora/" target="_blank" class="donate-chip" title="Geliştiriciye Destek Ol">
+                    <span>💖 Destek</span>
+                </a>
+            </div>
+        </header>
+
+        <!-- Status Capsule -->
+        <div class="status-capsule" id="statusCapsule">
+            <span class="capsule-dot" id="capsuleDot"></span>
+            <span class="capsule-text" id="capsuleText">KORUMA DEVRE DIŞI</span>
+        </div>
+
+        <!-- Giant Power Button Center -->
+        <div class="power-button-wrap">
+            <div class="pulse-ring ring-1" id="pulseRing1"></div>
+            <div class="pulse-ring ring-2" id="pulseRing2"></div>
+            <button class="power-btn" id="btnToggleConnect">
+                <div class="btn-inner">
+                    <svg class="power-icon" viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+                        <line x1="12" y1="2" x2="12" y2="12"></line>
+                    </svg>
+                    <span class="power-label" id="powerLabel">BAĞLAN</span>
+                </div>
+            </button>
+        </div>
+
+        <!-- Connection Meta Info -->
+        <div class="connection-meta">
+            <h4 id="shieldHeading">GÜVENLİK KAPALI</h4>
+            <p id="shieldSub">Sansürsüz ve güvenli internet için dokunun</p>
+            <div class="timer-badge" id="timerBadge" style="display: none;">
+                <span>⏱️ <span id="uptimeText">00:00:00</span></span>
+            </div>
+        </div>
+
+        <!-- Active Server Quick Picker -->
+        <div class="server-picker-bar" id="btnOpenServerList" title="Sunucu Değiştir">
+            <div class="server-flag" id="targetFlag">🌐</div>
+            <div class="server-info">
+                <span class="server-label">HEDEF ÇIKIŞ</span>
+                <strong class="server-name" id="targetName">FPN Cloud (Otomatik)</strong>
+            </div>
+            <div class="server-actions">
+                <span class="ping-badge" id="targetPing">⚡ 42 ms</span>
+                <span class="chevron">▾</span>
+            </div>
+        </div>
+
+        <!-- Smart Connect Quick Action -->
+        <button class="btn-smart-connect" id="btnSmartConnect">
+            <span>⚡ En Hızlı Sunucuya Otomatik Bağlan</span>
+        </button>
+
+        <!-- Backend Offline Notice (Only shown if desktop core is offline) -->
+        <div class="offline-warning" id="offlineNotice" style="display: none;">
+            <div class="warning-text">
+                <strong>⚠️ FPN İstemcisi Bekleniyor</strong>
+                <span>Masaüstü uygulaması kapalı. Sadece tarayıcı proxy'sini kullanabilirsiniz.</span>
+            </div>
+            <button class="btn-browser-only" id="btnBrowserOnly">Yerel Proxy'yi Aç (SOCKS5)</button>
+        </div>
+
+        <!-- Footer / Support -->
+        <footer class="popup-footer">
+            <a href="https://donatr.ee/fnora/" target="_blank" class="footer-link">
+                <span>FPN Açık Kaynaktır • Bağış Yap ➔</span>
+            </a>
+        </footer>
+
+        <!-- Server Selector Drawer / Modal -->
+        <div class="server-modal" id="serverModal">
+            <div class="server-modal-header">
+                <strong>Çıkış Noktası Seçin</strong>
+                <button class="btn-close-modal" id="btnCloseServerModal">&times;</button>
+            </div>
+            <div class="server-list" id="serverListContainer">
+                <div class="loading-nodes">Sunucular yükleniyor...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>

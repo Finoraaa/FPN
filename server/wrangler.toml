@@ -1,0 +1,8 @@
+name = "fpn-core-worker"
+main = "worker.js"
+compatibility_date = "2024-04-01"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+# Kendi özel UUID'nizi buraya yazabilirsiniz (veya varsayılanı kullanın):
+UUID = "d342d11e-d424-4583-b36e-524ab1f0afa4"

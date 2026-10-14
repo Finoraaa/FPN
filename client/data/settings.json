@@ -1,0 +1,10 @@
+{
+  "mixedPort": 2080,
+  "clashApiPort": 9090,
+  "dnsServer": "https://1.1.1.1/dns-query",
+  "autoSetSystemProxy": true,
+  "bypassTurkey": true,
+  "blockAds": true,
+  "tunMode": false,
+  "activeNodeId": "node-fpn-de-frankfurt"
+}
