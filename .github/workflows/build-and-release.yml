@@ -72,7 +72,13 @@ jobs:
 
       # Build Electron Distributable Packages
       - name: Build Electron App
-        run: npx electron-builder --${{ matrix.platform }}
+        shell: bash
+        run: |
+          if [ "${{ matrix.platform }}" = "mac" ]; then
+            npx --yes electron-builder --mac -c.mac.identity=null
+          else
+            npx --yes electron-builder --${{ matrix.platform }}
+          fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
