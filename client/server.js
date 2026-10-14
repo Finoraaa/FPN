@@ -85,6 +85,13 @@ if (!isWin) {
 }
 
 
+// Application Version
+let appVersion = '1.0.2';
+try {
+    const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
+    if (pkg && pkg.version) appVersion = pkg.version;
+} catch (e) {}
+
 // State
 let singboxProcess = null;
 let isConnected = false;
@@ -100,6 +107,24 @@ let failoverInterval = null;
 let failoverFailCount = 0;
 let isFailingOver = false;
 let desktopNotifier = null;
+
+// Auto-Update Engine State
+let updateState = {
+    checking: false,
+    hasUpdate: false,
+    currentVersion: appVersion,
+    latestVersion: null,
+    downloadUrl: null,
+    assetName: null,
+    releaseNotes: '',
+    downloading: false,
+    percent: 0,
+    downloadedBytes: 0,
+    totalBytes: 0,
+    readyToInstall: false,
+    downloadedFile: null,
+    error: null
+};
 
 function setNotifier(fn) {
     desktopNotifier = fn;
@@ -1468,6 +1493,208 @@ async function importSubscription(subUrl) {
     });
 }
 
+/**
+ * ====================================================================
+ *  In-App OTA Auto-Updater Engine (GitHub Releases API)
+ * ====================================================================
+ */
+function isNewerVersion(remote, local) {
+    if (!remote || !local) return false;
+    const rParts = remote.replace(/^v/, '').split('.').map(n => parseInt(n, 10) || 0);
+    const lParts = local.replace(/^v/, '').split('.').map(n => parseInt(n, 10) || 0);
+    for (let i = 0; i < Math.max(rParts.length, lParts.length); i++) {
+        const r = rParts[i] || 0;
+        const l = lParts[i] || 0;
+        if (r > l) return true;
+        if (r < l) return false;
+    }
+    return false;
+}
+
+function checkGitHubUpdates() {
+    return new Promise((resolve) => {
+        updateState.checking = true;
+        const req = https.get('https://api.github.com/repos/Finoraaa/FPN/releases/latest', {
+            headers: {
+                'User-Agent': 'FPN-Desktop-Client',
+                'Accept': 'application/vnd.github.v3+json'
+            }
+        }, (res) => {
+            let data = '';
+            res.on('data', chunk => data += chunk);
+            res.on('end', () => {
+                updateState.checking = false;
+                if (res.statusCode !== 200) {
+                    return resolve({
+                        hasUpdate: false,
+                        currentVersion: appVersion,
+                        error: `GitHub yanıt vermedi (HTTP ${res.statusCode})`
+                    });
+                }
+                try {
+                    const release = JSON.parse(data);
+                    const tag = release.tag_name || '';
+                    const latestVer = tag.replace(/^v/, '');
+                    const hasUpdate = isNewerVersion(latestVer, appVersion);
+
+                    let matchedAsset = null;
+                    if (Array.isArray(release.assets)) {
+                        if (isWin) {
+                            matchedAsset = release.assets.find(a => a.name.endsWith('Setup.exe') || a.name.endsWith('.exe'));
+                        } else if (process.platform === 'darwin') {
+                            matchedAsset = release.assets.find(a => a.name.endsWith('.dmg'));
+                        } else {
+                            matchedAsset = release.assets.find(a => a.name.endsWith('.AppImage'));
+                        }
+                    }
+
+                    updateState.hasUpdate = hasUpdate;
+                    updateState.currentVersion = appVersion;
+                    updateState.latestVersion = latestVer;
+                    updateState.releaseNotes = release.body || 'Performans iyileştirmeleri ve hata düzeltmeleri.';
+                    updateState.downloadUrl = matchedAsset ? matchedAsset.browser_download_url : null;
+                    updateState.assetName = matchedAsset ? matchedAsset.name : null;
+
+                    resolve({
+                        hasUpdate,
+                        currentVersion: appVersion,
+                        latestVersion: latestVer,
+                        releaseNotes: updateState.releaseNotes,
+                        assetName: updateState.assetName,
+                        downloadUrl: updateState.downloadUrl
+                    });
+                } catch (e) {
+                    resolve({ hasUpdate: false, currentVersion: appVersion, error: e.message });
+                }
+            });
+        });
+
+        req.on('error', (err) => {
+            updateState.checking = false;
+            resolve({ hasUpdate: false, currentVersion: appVersion, error: err.message });
+        });
+    });
+}
+
+function downloadFileWithRedirects(url, destPath, onProgress, onComplete, onError, redirectCount = 0) {
+    if (redirectCount > 5) {
+        return onError(new Error("Çok fazla yönlendirme (Redirect loop)."));
+    }
+
+    const client = url.startsWith('https') ? https : http;
+    const req = client.get(url, {
+        headers: { 'User-Agent': 'FPN-Desktop-Client' }
+    }, (res) => {
+        if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+            return downloadFileWithRedirects(res.headers.location, destPath, onProgress, onComplete, onError, redirectCount + 1);
+        }
+
+        if (res.statusCode !== 200) {
+            return onError(new Error(`İndirme başarısız: HTTP ${res.statusCode}`));
+        }
+
+        const totalBytes = parseInt(res.headers['content-length'] || 0, 10);
+        let downloadedBytes = 0;
+        const fileStream = fs.createWriteStream(destPath);
+
+        res.on('data', (chunk) => {
+            downloadedBytes += chunk.length;
+            if (totalBytes > 0 && typeof onProgress === 'function') {
+                const percent = Math.min(100, Math.floor((downloadedBytes / totalBytes) * 100));
+                onProgress(percent, downloadedBytes, totalBytes);
+            }
+        });
+
+        res.pipe(fileStream);
+
+        fileStream.on('finish', () => {
+            fileStream.close(() => onComplete(destPath));
+        });
+
+        fileStream.on('error', (err) => {
+            fs.unlink(destPath, () => {});
+            onError(err);
+        });
+    });
+
+    req.on('error', (err) => {
+        fs.unlink(destPath, () => {});
+        onError(err);
+    });
+}
+
+function startDownloadUpdate() {
+    if (!updateState.downloadUrl || !updateState.assetName) {
+        throw new Error("İndirilecek güncelleme paketi bulunamadı.");
+    }
+
+    const updatesDir = path.join(DATA_DIR, 'updates');
+    if (!fs.existsSync(updatesDir)) {
+        try { fs.mkdirSync(updatesDir, { recursive: true }); } catch (e) {}
+    }
+
+    const targetFile = path.join(updatesDir, updateState.assetName);
+    updateState.downloading = true;
+    updateState.percent = 0;
+    updateState.error = null;
+    updateState.readyToInstall = false;
+
+    downloadFileWithRedirects(
+        updateState.downloadUrl,
+        targetFile,
+        (percent, downloaded, total) => {
+            updateState.percent = percent;
+            updateState.downloadedBytes = downloaded;
+            updateState.totalBytes = total;
+        },
+        (savedPath) => {
+            updateState.downloading = false;
+            updateState.percent = 100;
+            updateState.readyToInstall = true;
+            updateState.downloadedFile = savedPath;
+            if (!isWin) {
+                try { fs.chmodSync(savedPath, 0o755); } catch (e) {}
+            }
+            appendLog(`✅ Yeni sürüm paketi indirildi (${updateState.assetName}). Yeniden başlatılmaya hazır!`);
+        },
+        (err) => {
+            updateState.downloading = false;
+            updateState.error = err.message;
+            appendLog(`❌ Güncelleme indirme hatası: ${err.message}`);
+        }
+    );
+}
+
+async function performInstallAndRestart() {
+    if (!updateState.readyToInstall || !updateState.downloadedFile) {
+        throw new Error("Kuruluma hazır güncel dosya bulunamadı.");
+    }
+
+    const file = updateState.downloadedFile;
+    if (isConnected) {
+        try { await stopVpn(); } catch (e) {}
+    }
+
+    appendLog("🚀 FPN yeni sürüme güncelleniyor ve uygulama yeniden başlatılıyor...");
+
+    setTimeout(() => {
+        if (isWin) {
+            spawn(file, ['/S'], { detached: true, stdio: 'ignore' }).unref();
+            process.exit(0);
+        } else if (process.platform === 'darwin') {
+            exec(`open "${file}"`);
+            process.exit(0);
+        } else {
+            // Linux AppImage / Binary
+            try { fs.chmodSync(file, 0o755); } catch (e) {}
+            spawn(file, [], { detached: true, stdio: 'ignore' }).unref();
+            process.exit(0);
+        }
+    }, 800);
+
+    return { success: true, message: "Yeniden başlatılıyor..." };
+}
+
 // HTTP Server
 const server = http.createServer(async (req, res) => {
     const parsedUrl = new URL(req.url, `http://${req.headers.host}`);
@@ -1866,12 +2093,30 @@ const server = http.createServer(async (req, res) => {
             }
 
             if (pathname === '/api/check-updates' && req.method === 'GET') {
-                return sendJson(200, {
-                    currentVersion: "1.2.0",
-                    latestVersion: "1.2.0",
-                    isLatest: true,
-                    releaseNotes: "FPN v1.2.0: Dahili Hız Testi, Clean IP Tarayıcısı, Reklam Engelleyici, Ağ Doktoru ve Sistem Tepsisi desteği."
-                });
+                const result = await checkGitHubUpdates();
+                return sendJson(200, result);
+            }
+
+            if (pathname === '/api/download-update' && req.method === 'POST') {
+                try {
+                    startDownloadUpdate();
+                    return sendJson(200, { success: true, message: "İndirme başlatıldı." });
+                } catch (e) {
+                    return sendJson(500, { error: e.message });
+                }
+            }
+
+            if (pathname === '/api/update-status' && req.method === 'GET') {
+                return sendJson(200, updateState);
+            }
+
+            if (pathname === '/api/install-update' && req.method === 'POST') {
+                try {
+                    const result = await performInstallAndRestart();
+                    return sendJson(200, result);
+                } catch (e) {
+                    return sendJson(500, { error: e.message });
+                }
             }
 
             return sendJson(404, { error: 'API bulunamadı' });

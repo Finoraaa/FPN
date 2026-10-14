@@ -76,6 +76,30 @@
 
         <!-- Main Content Area -->
         <main class="main-content">
+            <!-- AUTO-UPDATE NOTIFICATION BANNER -->
+            <div class="update-banner" id="updateBanner" style="display: none;">
+                <div class="update-banner-left">
+                    <span class="update-badge-icon">🚀</span>
+                    <div class="update-text-wrap">
+                        <div class="update-headline" id="updateBannerTitle">Yeni FPN Sürümü Mevcut</div>
+                        <div class="update-subtext" id="updateBannerSubtitle">Performans ve güvenlik güncellemelerini almak için tek tıkla geçiş yapın.</div>
+                    </div>
+                </div>
+                <div class="update-banner-right">
+                    <div class="update-progress-wrap" id="updateProgressWrap" style="display: none;">
+                        <div class="update-progress-track">
+                            <div class="update-progress-fill" id="updateProgressFill" style="width: 0%;"></div>
+                        </div>
+                        <span class="update-progress-label" id="updateProgressLabel">İndiriliyor: %0</span>
+                    </div>
+                    <button class="btn-update-cta" id="btnUpdateCta" onclick="triggerUpdateFlow()">
+                        <span class="cta-icon">⚡</span>
+                        <span class="cta-text" id="btnUpdateCtaText">Tek Tıkla Güncelle</span>
+                    </button>
+                    <button class="btn-update-close" onclick="dismissUpdateBanner()" title="Kapat">✕</button>
+                </div>
+            </div>
+
             <!-- Top Header Bar (Displayed on other tabs) -->
             <header class="top-header" id="topHeader" style="display: none;">
                 <div class="header-left">

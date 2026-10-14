@@ -1105,6 +1105,7 @@ window.addEventListener('DOMContentLoaded', () => {
     // Polling intervals
     setInterval(fetchStatus, 1500);
     setInterval(fetchIpInfo, 5000);
+    setTimeout(checkForAppUpdates, 2000);
 });
 
 // Donate Functions
@@ -1385,6 +1386,109 @@ document.querySelectorAll('.modal-overlay').forEach(modal => {
         }
     });
 });
+
+// ====================================================================
+// In-App Auto-Updater Logic
+// ====================================================================
+let updatePollTimer = null;
+let currentAppUpdate = null;
+
+async function checkForAppUpdates() {
+    try {
+        const res = await fetch(API_BASE + '/api/check-updates');
+        const data = await res.json();
+        if (data.hasUpdate && data.latestVersion) {
+            currentAppUpdate = data;
+            const banner = document.getElementById('updateBanner');
+            const title = document.getElementById('updateBannerTitle');
+            const sub = document.getElementById('updateBannerSubtitle');
+            if (banner && title) {
+                title.innerText = `🚀 Yeni FPN Sürümü Mevcut: v${data.latestVersion}`;
+                if (sub && data.releaseNotes) {
+                    sub.innerText = data.releaseNotes.split('\n')[0] || "Performans ve güvenlik güncellemelerini almak için tek tıkla geçiş yapın.";
+                }
+                banner.style.display = 'flex';
+            }
+        }
+    } catch (e) {
+        console.log("Güncelleme kontrolü atlandı:", e.message);
+    }
+}
+
+async function triggerUpdateFlow() {
+    const btn = document.getElementById('btnUpdateCta');
+    const btnText = document.getElementById('btnUpdateCtaText');
+    const progressWrap = document.getElementById('updateProgressWrap');
+    const progressFill = document.getElementById('updateProgressFill');
+    const progressLabel = document.getElementById('updateProgressLabel');
+
+    if (!btn || !btnText) return;
+
+    // If ready to install, perform restart
+    if (btn.classList.contains('ready')) {
+        btn.disabled = true;
+        btnText.innerText = "Yeniden Başlatılıyor...";
+        showToast("🚀 FPN yeni sürüme güncelleniyor, uygulama yeniden başlatılıyor...", "success");
+        try {
+            await fetch(API_BASE + '/api/install-update', { method: 'POST' });
+        } catch (e) {}
+        return;
+    }
+
+    // Start download
+    btn.disabled = true;
+    btnText.innerText = "İndirme Başlatılıyor...";
+    if (progressWrap) progressWrap.style.display = 'flex';
+
+    try {
+        const res = await fetch(API_BASE + '/api/download-update', { method: 'POST' });
+        const data = await res.json();
+        if (!data.success) {
+            throw new Error(data.error || "İndirme başlatılamadı.");
+        }
+
+        // Start polling progress
+        if (updatePollTimer) clearInterval(updatePollTimer);
+        updatePollTimer = setInterval(async () => {
+            try {
+                const sRes = await fetch(API_BASE + '/api/update-status');
+                const status = await sRes.json();
+
+                if (status.percent !== undefined) {
+                    if (progressFill) progressFill.style.width = status.percent + '%';
+                    if (progressLabel) progressLabel.innerText = `İndiriliyor: %${status.percent}`;
+                    btnText.innerText = `İndiriliyor: %${status.percent}`;
+                }
+
+                if (status.readyToInstall) {
+                    clearInterval(updatePollTimer);
+                    updatePollTimer = null;
+                    if (progressWrap) progressWrap.style.display = 'none';
+                    btn.disabled = false;
+                    btn.classList.add('ready');
+                    btnText.innerText = "🔄 Şimdi Yeniden Başlat";
+                    showToast("✅ Güncelleme hazır! Şimdi Yeniden Başlat butonuna basarak güncel sürüme geçebilirsiniz.", "success");
+                } else if (status.error) {
+                    clearInterval(updatePollTimer);
+                    updatePollTimer = null;
+                    btn.disabled = false;
+                    btnText.innerText = "Tekrar Dene";
+                    showToast("İndirme hatası: " + status.error, "error");
+                }
+            } catch (e) {}
+        }, 500);
+
+    } catch (err) {
+        btn.disabled = false;
+        btnText.innerText = "Tek Tıkla Güncelle";
+        showToast("Güncelleme hatası: " + err.message, "error");
+    }
+}
+
+function dismissUpdateBanner() {
+    const banner = document.getElementById('updateBanner');
+    if (banner) banner.style.display = 'none';
+}
 
 
 

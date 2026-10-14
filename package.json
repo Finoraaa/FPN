@@ -1,6 +1,6 @@
 {
   "name": "fpn-vpn",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "FPN - Freedom Private Network Desktop Application",
   "main": "main.js",
   "author": {
@@ -24,6 +24,11 @@
   "build": {
     "appId": "com.freedom.fpn",
     "productName": "FPN",
+    "publish": {
+      "provider": "github",
+      "owner": "Finoraaa",
+      "repo": "FPN"
+    },
     "directories": {
       "output": "dist"
     },
@@ -72,5 +77,8 @@
       "category": "public.app-category.utilities",
       "icon": "client/public/img/icon.png"
     }
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.9"
   }
 }
