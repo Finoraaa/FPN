@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "description": "FPN - Freedom Private Network Desktop Application",
   "main": "main.js",
-  "author": "FPN Team",
+  "author": {
+    "name": "Finoraaa",
+    "email": "Finoraaa@users.noreply.github.com"
+  },
   "license": "MIT",
   "scripts": {
     "start": "electron .",
@@ -42,6 +45,7 @@
       }
     ],
     "linux": {
+      "maintainer": "Finoraaa <Finoraaa@users.noreply.github.com>",
       "target": [
         "AppImage",
         "deb"

@@ -43,16 +43,22 @@ jobs:
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path bin
-          Invoke-WebRequest -Uri "https://github.com/SagerNet/sing-box/releases/download/v1.10.7/sing-box-1.10.7-windows-amd64.zip" -OutFile "sing-box.zip"
-          Expand-Archive -Path "sing-box.zip" -DestinationPath "temp_sb" -Force
-          Copy-Item -Path "temp_sb\*\sing-box.exe" -Destination "bin\sing-box.exe" -Force
-          Remove-Item -Recurse -Force "sing-box.zip", "temp_sb"
+          curl.exe -sL "https://github.com/SagerNet/sing-box/releases/download/v1.10.7/sing-box-1.10.7-windows-amd64.zip" -o "sing-box.zip"
+          tar.exe -xf "sing-box.zip"
+          Move-Item -Path "sing-box-*\sing-box.exe" -Destination "bin\sing-box.exe" -Force
+          Remove-Item -Recurse -Force "sing-box.zip", "sing-box-*"
 
       - name: Setup sing-box core (macOS)
         if: matrix.platform == 'mac'
         run: |
           mkdir -p bin
-          curl -sL "https://github.com/SagerNet/sing-box/releases/download/v1.10.7/sing-box-1.10.7-darwin-universal.tar.gz" -o sing-box.tar.gz
+          ARCH=$(uname -m)
+          if [ "$ARCH" = "x86_64" ]; then
+            SB_ARCH="amd64"
+          else
+            SB_ARCH="arm64"
+          fi
+          curl -sL "https://github.com/SagerNet/sing-box/releases/download/v1.10.7/sing-box-1.10.7-darwin-${SB_ARCH}.tar.gz" -o sing-box.tar.gz
           tar -xzf sing-box.tar.gz
           cp sing-box-*/sing-box bin/sing-box
           chmod +x bin/sing-box
