@@ -1685,8 +1685,31 @@ async function performInstallAndRestart() {
             exec(`open "${file}"`);
             process.exit(0);
         } else {
-            // Linux AppImage / Binary
+            // Linux AppImage / Binary In-Place Auto-Replacement
             try { fs.chmodSync(file, 0o755); } catch (e) {}
+
+            const currentAppImage = process.env.APPIMAGE;
+            if (currentAppImage && fs.existsSync(currentAppImage)) {
+                try {
+                    const backupPath = currentAppImage + '.old';
+                    try { fs.unlinkSync(backupPath); } catch (_) {}
+                    fs.renameSync(currentAppImage, backupPath);
+                    fs.copyFileSync(file, currentAppImage);
+                    fs.chmodSync(currentAppImage, 0o755);
+
+                    // Kullanıcının masaüstü / klasördeki mevcut AppImage dosyasını yeni sürümle doğrudan çalıştır
+                    spawn(currentAppImage, [], { detached: true, stdio: 'ignore' }).unref();
+                    setTimeout(() => {
+                        try { fs.unlinkSync(backupPath); } catch (_) {}
+                    }, 2000);
+                    process.exit(0);
+                    return;
+                } catch (err) {
+                    console.error("AppImage in-place replace failed, falling back:", err);
+                }
+            }
+
+            // Fallback: doğrudan indirilen güncel AppImage dosyasını başlat
             spawn(file, [], { detached: true, stdio: 'ignore' }).unref();
             process.exit(0);
         }
