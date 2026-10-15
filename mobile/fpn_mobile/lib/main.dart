@@ -88,7 +88,7 @@ class _FpnHomePageState extends State<FpnHomePage>
   late AnimationController _pulseController;
 
   // Ayarlar & Kalıcılık (SharedPreferences)
-  bool bypassTurkeyApps = true;
+  bool bypassTurkeyApps = false;
   bool killSwitchEnabled = false;
   bool autoConnectFastest = false;
   List<String> subscriptionUrls = [];
@@ -115,7 +115,7 @@ class _FpnHomePageState extends State<FpnHomePage>
     'com.avea.onlineislemler',
   ];
 
-  // Varsayılan Yüksek Hızlı VLESS Sunucuları
+  // Varsayılan Yüksek Hızlı VLESS Reality Sunucuları
   final List<FpnNode> defaultNodes = [
     FpnNode(
       id: 'node-de-frankfurt',
@@ -126,36 +126,28 @@ class _FpnHomePageState extends State<FpnHomePage>
           'vless://00144519-7e0d-476b-8d28-435576af9262@167.17.69.171:443?security=reality&sni=www.cloudflare.com&pbk=ALT8hIGeZEhi0sQFbXP_ntBg8Xo-v7i0YCLrqTnBxRk&sid=0990d22f&fp=chrome&type=tcp&flow=xtls-rprx-vision#FPN-Almanya-Frankfurt',
     ),
     FpnNode(
-      id: 'node-nl-amsterdam',
-      name: 'Hollanda - Amsterdam Ultra',
-      country: 'Hollanda',
-      flag: '🇳🇱',
+      id: 'node-eu-secure',
+      name: 'Avrupa - Apple Secure Reality',
+      country: 'Avrupa',
+      flag: '🇪🇺',
       vlessUri:
-          'vless://e6df2095-a73c-4043-8693-8d5a03686870@188.114.97.6:443?encryption=none&security=tls&sni=lucasjow.us.ci&fp=chrome&type=ws&host=lucasjow.us.ci&path=%2F%3FTelegram---DailyConfigs---DailyConfigs---DailyConfigs#FPN-Hollanda-Amsterdam',
+          'vless://44ae52b9-76fc-444d-8e43-186b4384b80a@86.54.28.75:443?security=reality&encryption=none&pbk=PryGoq51ilG0eLUPl9i0xCvmk1xpwkyFSr_tG4GNLlU&headerType=none&type=tcp&flow=xtls-rprx-vision&sni=www.apple.com&sid=1d86d17709852910#FPN-Avrupa-Apple',
     ),
     FpnNode(
-      id: 'node-fr-paris',
-      name: 'Fransa - Paris Secure',
-      country: 'Fransa',
-      flag: '🇫🇷',
+      id: 'node-us-fast',
+      name: 'Amerika - Global Express',
+      country: 'Amerika',
+      flag: '🇺🇸',
       vlessUri:
-          'vless://d342d11e-d224-4463-b982-532309285094@43.174.193.1:443?encryption=none&security=tls&sni=ccc.010304.xyz&fp=chrome&type=ws&host=ccc.010304.xyz&path=%2F#FPN-Fransa-Paris',
+          'vless://d65cc14c-f53f-4fe2-b262-97856601319c@169.40.42.231:443?encryption=none&flow=xtls-rprx-vision&security=reality&sni=yahoo.com&fp=chrome&pbk=e2RLf57Li_-MDZGE9ss1BWPgP54mqRb5PfXhW2jcVVg&sid=c39cc7310a&type=tcp&headerType=none#FPN-Amerika-Global',
     ),
     FpnNode(
-      id: 'node-de-berlin',
-      name: 'Almanya - Berlin Express',
-      country: 'Almanya',
-      flag: '🇩🇪',
+      id: 'node-us-cloud',
+      name: 'Amerika - Fast Cloud Reality',
+      country: 'Amerika',
+      flag: '🇺🇸',
       vlessUri:
-          'vless://e3c3b722-1264-4cdc-a97c-b0a1bb73cd67@140.225.208.50:2083?encryption=none&security=tls&sni=speedtestmark.com&fp=chrome&type=ws&host=speedtestmark.com&path=%2Fvless-ws#FPN-Almanya-Berlin',
-    ),
-    FpnNode(
-      id: 'node-bg-sofia',
-      name: 'Bulgaristan - Sofya Express',
-      country: 'Bulgaristan',
-      flag: '🇧🇬',
-      vlessUri:
-          'vless://d342d11e-d224-4463-b982-532309285094@203.202.232.211:443?encryption=none&security=tls&sni=ccc.010304.xyz&fp=chrome&type=ws&host=ccc.010304.xyz&path=%2Ffp%3Dchrome#FPN-Bulgaristan-Sofya',
+          'vless://d65cc14c-f53f-4fe2-b262-97856601319c@169.40.42.75:443?encryption=none&flow=xtls-rprx-vision&security=reality&sni=yahoo.com&fp=chrome&pbk=e2RLf57Li_-MDZGE9ss1BWPgP54mqRb5PfXhW2jcVVg&sid=c39cc7310a&type=tcp&headerType=none#FPN-Amerika-FastCloud',
     ),
   ];
 
@@ -206,7 +198,7 @@ class _FpnHomePageState extends State<FpnHomePage>
   Future<void> _loadPreferences() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      bypassTurkeyApps = prefs.getBool('fpn_bypass_turkey_apps') ?? true;
+      bypassTurkeyApps = prefs.getBool('fpn_bypass_turkey_apps') ?? false;
       killSwitchEnabled = prefs.getBool('fpn_kill_switch') ?? false;
       autoConnectFastest = prefs.getBool('fpn_auto_fastest') ?? false;
       subscriptionUrls = prefs.getStringList('fpn_subs') ?? [];
@@ -217,6 +209,14 @@ class _FpnHomePageState extends State<FpnHomePage>
         final loadedNodes =
             decoded.map((item) => FpnNode.fromJson(item)).toList();
         if (loadedNodes.isNotEmpty) {
+          for (final defNode in defaultNodes) {
+            final idx = loadedNodes.indexWhere((n) => n.id == defNode.id);
+            if (idx == -1) {
+              loadedNodes.add(defNode);
+            } else {
+              loadedNodes[idx] = defNode;
+            }
+          }
           setState(() {
             nodes = loadedNodes;
           });
@@ -270,6 +270,65 @@ class _FpnHomePageState extends State<FpnHomePage>
     );
   }
 
+  // --- V2Ray / Xray Konfigürasyonunu Optimize Et (DNS, Sniffing & Routing) ---
+  String _optimizeV2RayConfig(String rawConfig) {
+    try {
+      final Map<String, dynamic> json = jsonDecode(rawConfig);
+
+      // 1. Inbound Sniffing: Gelen bağlantılardan SNI (Host) ayrıştırılarak alan adı tespiti yapılır
+      if (json['inbounds'] is List) {
+        for (final inbound in json['inbounds']) {
+          if (inbound is Map<String, dynamic>) {
+            inbound['sniffing'] = {
+              'enabled': true,
+              'destOverride': ['http', 'tls'],
+              'metadataOnly': false,
+              'routeOnly': false,
+            };
+          }
+        }
+      }
+
+      // 2. DNS Sunucuları (Android VpnService.Builder sayısal IP adresi kabul eder)
+      json['dns'] = {
+        'servers': [
+          '1.1.1.1',
+          '8.8.8.8',
+          '1.0.0.1',
+          '8.8.4.4',
+        ],
+        'queryStrategy': 'UseIPv4',
+      };
+
+      // 3. Yönlendirme (Routing Kuralları): Port 53 DNS trafiği şifreli tünelden (proxy) akar
+      json['routing'] = {
+        'domainStrategy': 'IPIfNonMatch',
+        'rules': [
+          {
+            'type': 'field',
+            'outboundTag': 'proxy',
+            'port': '53',
+          },
+          {
+            'type': 'field',
+            'outboundTag': 'direct',
+            'ip': ['geoip:private'],
+          },
+          {
+            'type': 'field',
+            'outboundTag': 'proxy',
+            'network': 'tcp,udp',
+          },
+        ],
+      };
+
+      return jsonEncode(json);
+    } catch (e) {
+      debugPrint("optimizeV2RayConfig error: $e");
+      return rawConfig;
+    }
+  }
+
   Future<void> toggleConnection() async {
     if (isConnected) {
       userIntendedConnected = false;
@@ -295,9 +354,12 @@ class _FpnHomePageState extends State<FpnHomePage>
         final V2RayURL v2rayUrl = FlutterV2ray.parseFromURL(selectedNode.vlessUri);
         userIntendedConnected = true;
 
+        final rawConfig = v2rayUrl.getFullConfiguration();
+        final optimizedConfig = _optimizeV2RayConfig(rawConfig);
+
         await flutterV2ray.startV2Ray(
           remark: selectedNode.name,
-          config: v2rayUrl.getFullConfiguration(),
+          config: optimizedConfig,
           proxyOnly: false,
           blockedApps: bypassTurkeyApps ? defaultBypassApps : null,
           notificationDisconnectButtonName: "BAĞLANTIYI KES",
@@ -323,7 +385,7 @@ class _FpnHomePageState extends State<FpnHomePage>
         final V2RayURL v2rayUrl =
             FlutterV2ray.parseFromURL(selectedNode.vlessUri);
         final delay = await flutterV2ray.getServerDelay(
-            config: v2rayUrl.getFullConfiguration());
+            config: _optimizeV2RayConfig(v2rayUrl.getFullConfiguration()));
         setState(() => currentPing = delay);
       }
     } catch (_) {}
@@ -342,7 +404,7 @@ class _FpnHomePageState extends State<FpnHomePage>
       try {
         final parsed = FlutterV2ray.parseFromURL(node.vlessUri);
         final delay = await flutterV2ray.getServerDelay(
-            config: parsed.getFullConfiguration());
+            config: _optimizeV2RayConfig(parsed.getFullConfiguration()));
         node.ping = delay;
         if (delay > 0 && delay < minDelay) {
           minDelay = delay;
