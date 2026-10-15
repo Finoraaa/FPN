@@ -56,7 +56,7 @@ class FpnApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'FPN - Freedom VPN',
+      title: 'FPN by Finora',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         brightness: Brightness.dark,
@@ -1458,33 +1458,71 @@ class _FpnHomePageState extends State<FpnHomePage>
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(8),
+                        width: 42,
+                        height: 42,
+                        padding: const EdgeInsets.all(2),
                         decoration: BoxDecoration(
                           color: const Color(0xFF121217),
-                          borderRadius: BorderRadius.circular(12),
-                          border:
-                              Border.all(color: Colors.white.withOpacity(0.08)),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                              color: const Color(0xFF38BDF8).withOpacity(0.4),
+                              width: 1.5),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF38BDF8).withOpacity(0.2),
+                              blurRadius: 10,
+                            ),
+                          ],
                         ),
-                        child: const Icon(
-                          Icons.shield_outlined,
-                          color: Color(0xFF10B981),
-                          size: 26,
+                        child: ClipOval(
+                          child: Image.asset(
+                            'assets/images/wolf_logo.png',
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 12),
-                      const Column(
+                      Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            "FPN",
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 1.2,
-                            ),
+                          Row(
+                            children: [
+                              const Text(
+                                "FPN",
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 1.2,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF38BDF8)
+                                      .withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(6),
+                                  border: Border.all(
+                                    color: const Color(0xFF38BDF8)
+                                        .withOpacity(0.4),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: const Text(
+                                  "by Finora",
+                                  style: TextStyle(
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF38BDF8),
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                          Text(
-                            "Freedom Private Network",
+                          const Text(
+                            "Finora Private Network",
                             style: TextStyle(
                                 fontSize: 11, color: Colors.white54),
                           ),
@@ -1629,7 +1667,7 @@ class _FpnHomePageState extends State<FpnHomePage>
               // Bağlantı Durumu & Mod Bilgisi
               Text(
                 isConnected
-                    ? "GÜVENDESİNİZ • SANSÜRSÜZ İNTERNET"
+                    ? "FINORA SHIELD™ AKTİF • TAM GİZLİLİK"
                     : "Sansürsüz ve güvenli internet için butona dokunun",
                 textAlign: TextAlign.center,
                 style: TextStyle(

@@ -151,6 +151,12 @@ body {
     flex-direction: column;
 }
 
+.logo-main-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
 .logo-title {
     font-size: 1.25rem;
     font-weight: 800;
@@ -165,6 +171,24 @@ body {
     color: var(--primary-cyan);
     letter-spacing: 1.2px;
     text-transform: uppercase;
+}
+
+.brand-tag-finora {
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: linear-gradient(135deg, rgba(0, 242, 254, 0.18), rgba(79, 172, 254, 0.12));
+    border: 1px solid rgba(0, 242, 254, 0.4);
+    color: var(--primary-cyan);
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
+}
+
+.badge-finora-accent {
+    font-weight: 700;
+    color: var(--primary-cyan);
 }
 
 .nav-links {
