@@ -110,9 +110,9 @@ body {
 .brand-icon {
     width: 46px;
     height: 46px;
-    background: linear-gradient(135deg, #1f1f24, #121215);
-    border: 1px solid rgba(0, 240, 255, 0.35);
-    box-shadow: 0 0 20px rgba(0, 240, 255, 0.25);
+    background: #121215;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 16px rgba(255, 255, 255, 0.1);
     border-radius: 14px;
     display: flex;
     align-items: center;
@@ -128,36 +128,19 @@ body {
 }
 
 .brand-text h1 {
-    font-size: 1.5rem;
+    font-size: 1.6rem;
     font-weight: 900;
     letter-spacing: 1px;
-    background: linear-gradient(135deg, #ffffff 40%, #00f0ff);
+    background: linear-gradient(135deg, #ffffff 40%, #a1a1aa);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    display: inline-flex;
-    align-items: center;
-}
-
-.brand-badge-finora {
-    font-size: 0.62rem;
-    font-weight: 700;
-    color: #00f0ff;
-    letter-spacing: 0.5px;
-    padding: 2px 6px;
-    border-radius: 6px;
-    background: rgba(0, 240, 255, 0.12);
-    border: 1px solid rgba(0, 240, 255, 0.3);
-    margin-left: 6px;
-    vertical-align: middle;
-    -webkit-text-fill-color: #00f0ff;
 }
 
 .brand-tag {
     font-size: 0.68rem;
     font-weight: 700;
-    color: #00f0ff;
-    opacity: 0.8;
-    letter-spacing: 1.5px;
+    color: #a1a1aa;
+    letter-spacing: 2px;
 }
 
 .nav-menu {

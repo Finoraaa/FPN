@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 
-const String currentAppVersion = '1.0.6';
+const String currentAppVersion = '1.0.7';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -56,7 +56,7 @@ class FpnApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'FPN by Finora',
+      title: 'FPN',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         brightness: Brightness.dark,
@@ -1465,11 +1465,11 @@ class _FpnHomePageState extends State<FpnHomePage>
                           color: const Color(0xFF121217),
                           shape: BoxShape.circle,
                           border: Border.all(
-                              color: const Color(0xFF38BDF8).withOpacity(0.4),
+                              color: Colors.white.withOpacity(0.2),
                               width: 1.5),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF38BDF8).withOpacity(0.2),
+                              color: Colors.white.withOpacity(0.08),
                               blurRadius: 10,
                             ),
                           ],
@@ -1482,47 +1482,19 @@ class _FpnHomePageState extends State<FpnHomePage>
                         ),
                       ),
                       const SizedBox(width: 12),
-                      Column(
+                      const Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            children: [
-                              const Text(
-                                "FPN",
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: 1.2,
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 6, vertical: 2),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF38BDF8)
-                                      .withOpacity(0.15),
-                                  borderRadius: BorderRadius.circular(6),
-                                  border: Border.all(
-                                    color: const Color(0xFF38BDF8)
-                                        .withOpacity(0.4),
-                                    width: 1,
-                                  ),
-                                ),
-                                child: const Text(
-                                  "by Finora",
-                                  style: TextStyle(
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF38BDF8),
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
-                              ),
-                            ],
+                          Text(
+                            "FPN",
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 1.2,
+                            ),
                           ),
-                          const Text(
-                            "Finora Private Network",
+                          Text(
+                            "Freedom Private Network",
                             style: TextStyle(
                                 fontSize: 11, color: Colors.white54),
                           ),
@@ -1667,7 +1639,7 @@ class _FpnHomePageState extends State<FpnHomePage>
               // Bağlantı Durumu & Mod Bilgisi
               Text(
                 isConnected
-                    ? "FINORA SHIELD™ AKTİF • TAM GİZLİLİK"
+                    ? "GÜVENDESİNİZ • SANSÜRSÜZ İNTERNET"
                     : "Sansürsüz ve güvenli internet için butona dokunun",
                 textAlign: TextAlign.center,
                 style: TextStyle(

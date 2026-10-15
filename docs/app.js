@@ -6,20 +6,20 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Default Fallback Release State (v1.0.6)
+    // Default Fallback Release State (v1.0.7)
     const releaseConfig = {
         repo: 'Finoraaa/FPN',
-        version: '1.0.6',
-        tag: 'v1.0.6',
-        baseUrl: 'https://github.com/Finoraaa/FPN/releases/download/v1.0.6/',
+        version: '1.0.7',
+        tag: 'v1.0.7',
+        baseUrl: 'https://github.com/Finoraaa/FPN/releases/download/v1.0.7/',
         assets: {
-            winSetup: 'FPN-Setup-1.0.6.exe',
-            winPortable: 'FPN-1.0.6.exe',
+            winSetup: 'FPN-Setup-1.0.7.exe',
+            winPortable: 'FPN-1.0.7.exe',
             androidApk: 'FPN-Android.apk',
-            linuxAppImage: 'FPN-1.0.6.AppImage',
-            linuxDeb: 'fpn-vpn_1.0.6_amd64.deb',
-            macDmg: 'FPN-1.0.6-arm64.dmg',
-            macZip: 'FPN-1.0.6-arm64-mac.zip',
+            linuxAppImage: 'FPN-1.0.7.AppImage',
+            linuxDeb: 'fpn-vpn_1.0.7_amd64.deb',
+            macDmg: 'FPN-1.0.7-arm64.dmg',
+            macZip: 'FPN-1.0.7-arm64-mac.zip',
             webExt: 'fpn-web-extension.zip'
         }
     };
@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
             name: 'Masaüstü Cihazınız',
             icon: '💻',
             assetKey: 'winSetup',
-            buttonText: 'Hemen İndirin (v1.0.6)',
+            buttonText: 'Hemen İndirin (v1.0.7)',
             filename: releaseConfig.assets.winSetup
         };
     }
@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const targetCardId = cardMap[os.id];
         if (targetCardId) {
             const cardEl = document.getElementById(targetCardId);
-            if (cardEl) cardEl.style.borderColor = 'rgba(0, 242, 254, 0.8)';
+            if (cardEl) cardEl.style.borderColor = 'rgba(255, 255, 255, 0.8)';
         }
     }
 
@@ -147,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!res.ok) return;
 
             const data = await res.json();
-            const tag = data.tag_name || 'v1.0.6';
+            const tag = data.tag_name || 'v1.0.7';
             const ver = tag.replace(/^v/, '');
 
             releaseConfig.tag = tag;

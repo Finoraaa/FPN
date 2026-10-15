@@ -94,7 +94,7 @@ function createTray() {
 
         const contextMenu = Menu.buildFromTemplate([
             {
-                label: '🛡️ FPN - Freedom Private Network',
+                label: '🐺 FPN',
                 enabled: false
             },
             { type: 'separator' },
@@ -125,7 +125,7 @@ function createTray() {
             }
         ]);
 
-        tray.setToolTip('FPN - Freedom Private Network (Kısayol: Ctrl+Alt+V)');
+        tray.setToolTip('FPN (Kısayol: Ctrl+Alt+V)');
         tray.setContextMenu(contextMenu);
 
         tray.on('click', () => {
@@ -149,7 +149,7 @@ function createWindow() {
         height: 800,
         minWidth: 940,
         minHeight: 640,
-        title: 'FPN - Freedom Private Network',
+        title: 'FPN',
         icon: iconPath,
         backgroundColor: '#09090b',
         autoHideMenuBar: true,
