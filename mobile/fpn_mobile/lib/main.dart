@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 
-const String currentAppVersion = '1.0.4';
+const String currentAppVersion = '1.0.5';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -224,6 +224,15 @@ class _FpnHomePageState extends State<FpnHomePage>
         final loadedNodes =
             decoded.map((item) => FpnNode.fromJson(item)).toList();
         if (loadedNodes.isNotEmpty) {
+          // Eski çalışmayan / kapanmış topluluk node'larını temizle (migration)
+          const obsoleteIds = {
+            'node-nl-amsterdam',
+            'node-fr-paris',
+            'node-de-berlin',
+            'node-bg-sofia',
+          };
+          loadedNodes.removeWhere((n) => obsoleteIds.contains(n.id));
+
           for (final defNode in defaultNodes) {
             final idx = loadedNodes.indexWhere((n) => n.id == defNode.id);
             if (idx == -1) {
@@ -239,7 +248,13 @@ class _FpnHomePageState extends State<FpnHomePage>
       }
 
       final savedNodeId = prefs.getString('fpn_selected_node_id');
-      if (savedNodeId != null) {
+      const obsoleteIds = {
+        'node-nl-amsterdam',
+        'node-fr-paris',
+        'node-de-berlin',
+        'node-bg-sofia',
+      };
+      if (savedNodeId != null && !obsoleteIds.contains(savedNodeId)) {
         final match = nodes.firstWhere(
           (n) => n.id == savedNodeId,
           orElse: () => nodes[0],
@@ -285,7 +300,7 @@ class _FpnHomePageState extends State<FpnHomePage>
     );
   }
 
-  // --- V2Ray / Xray Konfigürasyonunu Optimize Et (DNS, Sniffing & Routing) ---
+  // --- V2Ray / Xray Konfigürasyonunu Optimize Et (DNS & Inbound Sniffing) ---
   String _optimizeV2RayConfig(String rawConfig) {
     try {
       final Map<String, dynamic> json = jsonDecode(rawConfig);
@@ -304,7 +319,7 @@ class _FpnHomePageState extends State<FpnHomePage>
         }
       }
 
-      // 2. DNS Sunucuları (Android VpnService.Builder sayısal IP adresi kabul eder)
+      // 2. DNS Sunucuları (Android VpnService.Builder için güvenilir sayısal IP'ler)
       json['dns'] = {
         'servers': [
           '1.1.1.1',
@@ -315,26 +330,10 @@ class _FpnHomePageState extends State<FpnHomePage>
         'queryStrategy': 'UseIPv4',
       };
 
-      // 3. Yönlendirme (Routing Kuralları): Port 53 DNS trafiği şifreli tünelden (proxy) akar
+      // 3. Routing: Varsayılan "UseIp" stratejisi korunur. Harici geoip kuralı eklenmez
+      // böylece dosya bağımlılığı olmadan tüm trafik doğrudan şifreli proxy üzerinden akar.
       json['routing'] = {
-        'domainStrategy': 'IPIfNonMatch',
-        'rules': [
-          {
-            'type': 'field',
-            'outboundTag': 'proxy',
-            'port': '53',
-          },
-          {
-            'type': 'field',
-            'outboundTag': 'direct',
-            'ip': ['geoip:private'],
-          },
-          {
-            'type': 'field',
-            'outboundTag': 'proxy',
-            'network': 'tcp,udp',
-          },
-        ],
+        'domainStrategy': 'UseIp',
       };
 
       return jsonEncode(json);

@@ -86,7 +86,7 @@ if (!isWin) {
 
 
 // Application Version
-let appVersion = '1.0.4';
+let appVersion = '1.0.5';
 try {
     const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
     if (pkg && pkg.version) appVersion = pkg.version;
