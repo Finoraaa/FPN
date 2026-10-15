@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Primary Meta Tags -->
+    <title>FPN - Freedom Private Network | Sansürsüz, Hızlı ve Açık Kaynak VPN</title>
+    <meta name="title" content="FPN - Freedom Private Network | Sansürsüz, Hızlı ve Açık Kaynak VPN">
+    <meta name="description" content="FPN (Freedom Private Network), internet engellerini aşmak ve tam gizlilik sağlamak için geliştirilmiş yeni nesil, VLESS Reality tabanlı, %100 açık kaynaklı ve ücretsiz VPN istemcisidir.">
+    <meta name="keywords" content="vpn, free vpn, açık kaynak vpn, vless, reality, sing-box, xray, sansürsüz internet, fpn vpn, android vpn apk, windows vpn, linux vpn appimage">
+    <meta name="author" content="Finoraaa">
+    <meta name="theme-color" content="#070a13">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://finoraaa.github.io/FPN/">
+    <meta property="og:title" content="FPN - Freedom Private Network">
+    <meta property="og:description" content="Sansürsüz, hızlı ve güvenli özgür internet istemcisi. Windows, Android, Linux ve macOS için tek tıkla indirin.">
+    <meta property="og:image" content="https://raw.githubusercontent.com/Finoraaa/FPN/main/client/public/img/icon.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="FPN - Freedom Private Network">
+    <meta property="twitter:description" content="Sansürsüz, hızlı ve güvenli özgür internet istemcisi. Tüm işletim sistemleri için ücretsiz ve açık kaynak.">
+    <meta property="twitter:image" content="https://raw.githubusercontent.com/Finoraaa/FPN/main/client/public/img/icon.png">
+
+    <link rel="icon" type="image/png" href="assets/icon.png">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Background Ambient Glow -->
+    <div class="glow-orb orb-1"></div>
+    <div class="glow-orb orb-2"></div>
+    <div class="glow-orb orb-3"></div>
+    <div class="grid-overlay"></div>
+
+    <!-- Navigation Bar -->
+    <header class="navbar" id="main-nav">
+        <div class="nav-container">
+            <a href="#" class="brand-logo" id="brand-logo">
+                <img src="assets/icon.png" alt="FPN Logo" class="logo-img">
+                <div class="logo-text">
+                    <span class="logo-title">FPN</span>
+                    <span class="logo-sub">Freedom Network</span>
+                </div>
+            </a>
+
+            <nav class="nav-links">
+                <a href="#features" class="nav-link" id="nav-link-features">Özellikler</a>
+                <a href="#servers" class="nav-link" id="nav-link-servers">Sunucular</a>
+                <a href="#downloads" class="nav-link" id="nav-link-downloads">İndir</a>
+                <a href="#faq" class="nav-link" id="nav-link-faq">S.S.S.</a>
+            </nav>
+
+            <div class="nav-actions">
+                <a href="https://github.com/Finoraaa/FPN" target="_blank" rel="noopener noreferrer" class="btn btn-github" id="btn-github-star">
+                    <svg class="icon" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                        <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                    </svg>
+                    <span>GitHub'da İncele</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main>
+        <!-- Hero Section -->
+        <section class="hero-section" id="hero">
+            <div class="container hero-container">
+                <div class="hero-badge" id="hero-release-badge">
+                    <span class="badge-dot"></span>
+                    <span class="badge-text" id="badge-version-text">FPN v1.0.6 Yayında</span>
+                    <span class="badge-arrow">→</span>
+                </div>
+
+                <h1 class="hero-title">
+                    Sansürsüz, Hızlı ve <br>
+                    <span class="gradient-text">Gerçekten Özgür İnternet</span>
+                </h1>
+
+                <p class="hero-subtitle">
+                    Gelişmiş VLESS Reality protokolüyle DPI filtrelerini aşın, tüm trafiğinizi normal HTTPS gibi maskeleyin. Sıfır kayıt (No-Logs), sıfır reklam ve %100 açık kaynak güvencesi.
+                </p>
+
+                <!-- Smart Auto-Detected OS Download Box -->
+                <div class="smart-download-card" id="smart-download-card">
+                    <div class="smart-card-header">
+                        <div class="detected-os-badge" id="detected-os-badge">
+                            <span class="os-icon" id="detected-os-icon">💻</span>
+                            <span class="os-name" id="detected-os-name">Cihazınız Tespit Ediliyor...</span>
+                        </div>
+                        <span class="verified-tag">✓ Doğrulanmış Resmi Sürüm</span>
+                    </div>
+
+                    <div class="smart-card-body">
+                        <a href="https://github.com/Finoraaa/FPN/releases/latest" class="btn btn-primary btn-cta-download" id="btn-primary-download">
+                            <svg class="btn-icon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            <span class="btn-text" id="btn-primary-text">Tek Tıkla Hemen İndir</span>
+                        </a>
+
+                        <div class="smart-file-meta" id="smart-file-meta">
+                            <span id="meta-filename">FPN-Setup-1.0.6.exe</span> • 
+                            <span id="meta-release-tag">v1.0.6</span> • 
+                            <span>Otomatik Güncelleme Destekli</span>
+                        </div>
+                    </div>
+
+                    <div class="smart-card-footer">
+                        <span>Farklı bir cihaza mı kuracaksınız?</span>
+                        <a href="#downloads" class="link-scroll-downloads" id="link-scroll-downloads">Tüm Platformları Görüntüle ↓</a>
+                    </div>
+                </div>
+
+                <!-- Trust Badges -->
+                <div class="trust-metrics">
+                    <div class="metric-item">
+                        <span class="metric-value">0%</span>
+                        <span class="metric-label">Veri Kaydı (Sıfır Log)</span>
+                    </div>
+                    <div class="metric-divider"></div>
+                    <div class="metric-item">
+                        <span class="metric-value">40ms</span>
+                        <span class="metric-label">Ortalama Frankfurt Ping</span>
+                    </div>
+                    <div class="metric-divider"></div>
+                    <div class="metric-item">
+                        <span class="metric-value">100%</span>
+                        <span class="metric-label">Özgür ve Açık Kaynak</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Live Server Network Section -->
+        <section class="section servers-section" id="servers">
+            <div class="container">
+                <div class="section-header">
+                    <span class="section-tag">GLOBAL DÜĞÜM AĞI</span>
+                    <h2 class="section-title">Yüksek Hızlı, Sansür Geçirmez Sunucular</h2>
+                    <p class="section-desc">Gelişmiş VLESS Reality mimarisi sayesinde tüm sunucularımız Türkiye ISS engellerini ve DPI filtrelerini anında delip geçer.</p>
+                </div>
+
+                <div class="servers-grid" id="servers-grid">
+                    <div class="server-card">
+                        <div class="server-card-top">
+                            <span class="flag">🇩🇪</span>
+                            <div class="server-info">
+                                <h3>Almanya - Frankfurt High-Speed</h3>
+                                <span class="protocol">VLESS Reality • XTLS Vision</span>
+                            </div>
+                            <span class="ping-badge ping-green" id="ping-de">38 ms</span>
+                        </div>
+                        <div class="server-meter">
+                            <div class="meter-bar" style="width: 95%;"></div>
+                        </div>
+                        <div class="server-footer">
+                            <span>Durum: Çevrimiçi</span>
+                            <span>Hat: 1 Gbps / Sınırsız</span>
+                        </div>
+                    </div>
+
+                    <div class="server-card">
+                        <div class="server-card-top">
+                            <span class="flag">🇪🇺</span>
+                            <div class="server-info">
+                                <h3>Avrupa - Apple Secure Reality</h3>
+                                <span class="protocol">VLESS Reality • SNI Masking</span>
+                            </div>
+                            <span class="ping-badge ping-green" id="ping-eu">42 ms</span>
+                        </div>
+                        <div class="server-meter">
+                            <div class="meter-bar" style="width: 92%;"></div>
+                        </div>
+                        <div class="server-footer">
+                            <span>Durum: Çevrimiçi</span>
+                            <span>Hat: 1 Gbps / Sınırsız</span>
+                        </div>
+                    </div>
+
+                    <div class="server-card">
+                        <div class="server-card-top">
+                            <span class="flag">🇺🇸</span>
+                            <div class="server-info">
+                                <h3>Amerika - Global Express</h3>
+                                <span class="protocol">VLESS Reality • Global Edge</span>
+                            </div>
+                            <span class="ping-badge ping-yellow" id="ping-us1">96 ms</span>
+                        </div>
+                        <div class="server-meter">
+                            <div class="meter-bar" style="width: 88%;"></div>
+                        </div>
+                        <div class="server-footer">
+                            <span>Durum: Çevrimiçi</span>
+                            <span>Hat: 1 Gbps / Netflix & AI</span>
+                        </div>
+                    </div>
+
+                    <div class="server-card">
+                        <div class="server-card-top">
+                            <span class="flag">🇺🇸</span>
+                            <div class="server-info">
+                                <h3>Amerika - Fast Cloud Reality</h3>
+                                <span class="protocol">VLESS Reality • CDN Bypass</span>
+                            </div>
+                            <span class="ping-badge ping-yellow" id="ping-us2">104 ms</span>
+                        </div>
+                        <div class="server-meter">
+                            <div class="meter-bar" style="width: 86%;"></div>
+                        </div>
+                        <div class="server-footer">
+                            <span>Durum: Çevrimiçi</span>
+                            <span>Hat: 1 Gbps / Akış Optimize</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ping-test-trigger">
+                    <button class="btn btn-secondary" id="btn-retest-ping">
+                        <svg class="icon spin-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M23 4v6h-6"></path>
+                            <path d="M1 20v-6h6"></path>
+                            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                        </svg>
+                        <span>Gecikme (Ping) Sürelerini Canlı Test Et</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- All Platform Downloads Grid -->
+        <section class="section downloads-section" id="downloads">
+            <div class="container">
+                <div class="section-header">
+                    <span class="section-tag">HER CİHAZDA ÇALIŞIR</span>
+                    <h2 class="section-title">Tüm İşletim Sistemleri İçin İndirin</h2>
+                    <p class="section-desc">Kayıt olmadan, kredi kartı bilgisi vermeden tek tıkla cihazınıza kurun ve anında bağlanın.</p>
+                </div>
+
+                <div class="downloads-grid">
+                    <!-- Windows Card -->
+                    <div class="download-card" id="card-windows">
+                        <div class="card-os-header">
+                            <div class="card-icon win-icon">🪟</div>
+                            <div>
+                                <h3>Windows</h3>
+                                <span class="os-support">Windows 10, 11 (64-bit)</span>
+                            </div>
+                        </div>
+                        <p class="card-desc">Otomatik kurulum paketi veya taşınabilir tek tık çalıştırılabilir sürüm.</p>
+                        <div class="card-download-actions">
+                            <a href="https://github.com/Finoraaa/FPN/releases/latest" class="btn btn-card-primary" id="btn-dl-win-setup">
+                                <span>Kurulum Dosyası (.exe)</span>
+                            </a>
+                            <a href="https://github.com/Finoraaa/FPN/releases/latest" class="btn btn-card-ghost" id="btn-dl-win-portable">
+                                <span>Taşınabilir (.exe)</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Android Card -->
+                    <div class="download-card featured-mobile-card" id="card-android">
+                        <div class="popular-ribbon">Mobil</div>
+                        <div class="card-os-header">
+                            <div class="card-icon android-icon">🤖</div>
+                            <div>
+                                <h3>Android</h3>
+                                <span class="os-support">Android 7.0 - 15+ (Tüm Cihazlar)</span>
+                            </div>
+                        </div>
+                        <p class="card-desc">Bölünmüş tünel, dahili OTA güncelleme ve akıllı sunucu seçimi içeren resmi APK.</p>
+                        <div class="card-download-actions">
+                            <a href="https://github.com/Finoraaa/FPN/releases/latest" class="btn btn-card-primary" id="btn-dl-android-apk">
+                                <span>Doğrudan APK İndir</span>
+                            </a>
+                            <button class="btn btn-card-ghost" id="btn-show-qr">
+                                <span>📱 Telefondan Tara (QR)</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Linux Card -->
+                    <div class="download-card" id="card-linux">
+                        <div class="card-os-header">
+                            <div class="card-icon linux-icon">🐧</div>
+                            <div>
+                                <h3>Linux</h3>
+                                <span class="os-support">Ubuntu, Debian, Fedora, Arch</span>
+                            </div>
+                        </div>
+                        <p class="card-desc">Kendi kendine güncellenen taşınabilir AppImage ve yerel Debian paketi.</p>
+                        <div class="card-download-actions">
+                            <a href="https://github.com/Finoraaa/FPN/releases/latest" class="btn btn-card-primary" id="btn-dl-linux-appimage">
+                                <span>AppImage (Tek Tık)</span>
+                            </a>
+                            <a href="https://github.com/Finoraaa/FPN/releases/latest" class="btn btn-card-ghost" id="btn-dl-linux-deb">
+                                <span>Debian Paketi (.deb)</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- macOS Card -->
+                    <div class="download-card" id="card-macos">
+                        <div class="card-os-header">
+                            <div class="card-icon mac-icon">🍏</div>
+                            <div>
+                                <h3>macOS</h3>
+                                <span class="os-support">Apple Silicon (M1/M2/M3) & Intel</span>
+                            </div>
+                        </div>
+                        <p class="card-desc">Mac donanımıyla tam uyumlu, optimize edilmiş DMG kurulum paketi.</p>
+                        <div class="card-download-actions">
+                            <a href="https://github.com/Finoraaa/FPN/releases/latest" class="btn btn-card-primary" id="btn-dl-mac-dmg">
+                                <span>Apple Silicon (.dmg)</span>
+                            </a>
+                            <a href="https://github.com/Finoraaa/FPN/releases/latest" class="btn btn-card-ghost" id="btn-dl-mac-zip">
+                                <span>Arşiv Paketi (.zip)</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Web Extension Card -->
+                    <div class="download-card span-full-card" id="card-extension">
+                        <div class="card-os-header">
+                            <div class="card-icon ext-icon">🧩</div>
+                            <div>
+                                <h3>Tarayıcı Eklentisi</h3>
+                                <span class="os-support">Chrome, Brave, Edge, Opera, Vivaldi</span>
+                            </div>
+                        </div>
+                        <p class="card-desc">Sadece tarayıcınızın trafiğini sansürsüz ve şifreli tünelden geçiren hafif web eklentisi paketi.</p>
+                        <div class="card-download-actions">
+                            <a href="https://github.com/Finoraaa/FPN/releases/latest" class="btn btn-card-primary" id="btn-dl-web-ext">
+                                <span>Tarayıcı Eklentisini İndir (.zip)</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- QR Code Modal (For Phone Download) -->
+        <div class="modal-overlay" id="qr-modal">
+            <div class="modal-container">
+                <button class="modal-close-btn" id="btn-close-modal">&times;</button>
+                <div class="modal-body">
+                    <h3>Telefonunla Tara & İndir</h3>
+                    <p>Telefonunun kamerasını aşağıdaki QR koda tutarak APK'yı doğrudan cihazına indirebilirsin:</p>
+                    <div class="qr-box">
+                        <img id="qr-code-image" src="" alt="FPN APK Download QR Code">
+                    </div>
+                    <span class="qr-target-url" id="qr-url-text">https://github.com/Finoraaa/FPN/releases/...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Key Features Grid -->
+        <section class="section features-section" id="features">
+            <div class="container">
+                <div class="section-header">
+                    <span class="section-tag">NEDEN FPN?</span>
+                    <h2 class="section-title">Geleneksel VPN'lerin Bittiği Yerde FPN Başlar</h2>
+                    <p class="section-desc">Gelişmiş mühendislik ve anti-sansür teknolojileriyle kesintisiz bağlantı sunuyoruz.</p>
+                </div>
+
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feat-icon-box">🛡️</div>
+                        <h3>VLESS Reality Protokolü</h3>
+                        <p>Trafiğiniz yapay HTTPS paketleri arkasına saklanır. Derin Paket İnceleme (DPI) filtreleri VPN kullandığınızı dahi anlayamaz.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feat-icon-box">🔒</div>
+                        <h3>Sıfır Kayıt (No-Logs)</h3>
+                        <p>Geliştirici dahil kimse ziyaret ettiğiniz siteleri, indirdiğiniz verileri veya gerçek IP adresinizi göremez veya kaydedemez.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feat-icon-box">⚡</div>
+                        <h3>Dahili OTA Güncelleme</h3>
+                        <p>Yeni bir kararlılık veya hız güncellemesi yayınlandığında, uygulama içerisinden tek dokunuşla otomatik güncellenirsiniz.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feat-icon-box">🌐</div>
+                        <h3>Dahili DNS Koruması</h3>
+                        <p>ISS DNS engellemelerini aşmak için tüm DNS sorguları şifreli tünel içinden doğrudan Cloudflare & Google DNS sunucularına iletilir.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feat-icon-box">🔄</div>
+                        <h3>Kesintisiz Failover</h3>
+                        <p>Bir sunucuda bakım veya yavaşlama olduğunda FPN anında en düşük pingli diğer yedek sunucuya otomatik geçiş yapar.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feat-icon-box">💻</div>
+                        <h3>%100 Açık Kaynak</h3>
+                        <p>Kodlarımız tamamen şeffaftır, GitHub üzerinde herkes tarafından incelenebilir, doğrulanabilir ve bağımsız olarak derlenebilir.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ Section -->
+        <section class="section faq-section" id="faq">
+            <div class="container max-w-narrow">
+                <div class="section-header">
+                    <span class="section-tag">SIKÇA SORULAN SORULAR</span>
+                    <h2 class="section-title">Merak Edilenler</h2>
+                </div>
+
+                <div class="faq-list">
+                    <details class="faq-item" open>
+                        <summary class="faq-question">FPN gerçekten tamamen ücretsiz mi?</summary>
+                        <div class="faq-answer">
+                            <p>Evet, FPN tamamen özgür interneti desteklemek amacıyla geliştirilmiş, reklam içermeyen ve sıfır maliyetli açık kaynak bir projedir.</p>
+                        </div>
+                    </details>
+
+                    <details class="faq-item">
+                        <summary class="faq-question">Diğer VPN'ler engellenirken FPN nasıl çalışabiliyor?</summary>
+                        <div class="faq-answer">
+                            <p>Geleneksel OpenVPN ve WireGuard gibi protokoller imza tespiti (DPI) ile kolayca engellenebilir. FPN ise VLESS Reality teknolojisiyle trafiği Google, Apple ve Cloudflare gibi küresel sitelerin normal HTTPS trafiği gibi taklit eder.</p>
+                        </div>
+                    </details>
+
+                    <details class="faq-item">
+                        <summary class="faq-question">Uygulamayı nasıl güncelleyeceğim?</summary>
+                        <div class="faq-answer">
+                            <p>Hiçbir şey yapmanıza gerek yok! Hem masaüstünde hem de Android'de yeni bir sürüm çıktığında ana ekranda otomatik bildirim kutusu çıkar ve tek tıkla en son sürüme geçersiniz.</p>
+                        </div>
+                    </details>
+
+                    <details class="faq-item">
+                        <summary class="faq-question">Kendi özel VPS sunucumu ekleyebilir miyim?</summary>
+                        <div class="faq-answer">
+                            <p>Kesinlikle! FPN hem masaüstü hem de mobil istemcisinde VLESS, Shadowsocks ve Trojan formatındaki özel sunucu bağlantı linklerini tek tıkla içe aktarmayı destekler.</p>
+                        </div>
+                    </details>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-container">
+            <div class="footer-brand">
+                <div class="brand-logo">
+                    <img src="assets/icon.png" alt="FPN" class="logo-img">
+                    <span class="logo-title">FPN</span>
+                </div>
+                <p>Freedom Private Network — Sansürsüz ve Özgür İnternet İstemcisi.</p>
+                <span class="license-tag">MIT Lisansı ile korunmaktadır.</span>
+            </div>
+
+            <div class="footer-links">
+                <h4>Hızlı Bağlantılar</h4>
+                <a href="#downloads">İndirme Merkezi</a>
+                <a href="#servers">Canlı Düğümler</a>
+                <a href="#features">Özellikler</a>
+                <a href="https://github.com/Finoraaa/FPN/releases" target="_blank" rel="noopener">Sürüm Notları</a>
+            </div>
+
+            <div class="footer-links">
+                <h4>Topluluk & Kod</h4>
+                <a href="https://github.com/Finoraaa/FPN" target="_blank" rel="noopener">GitHub Deposu</a>
+                <a href="https://github.com/Finoraaa/FPN/issues" target="_blank" rel="noopener">Hata Bildirimi (Issues)</a>
+                <a href="https://github.com/Finoraaa/FPN/blob/main/LICENSE" target="_blank" rel="noopener">Lisans Koşulları</a>
+            </div>
+        </div>
+
+        <div class="footer-bottom container">
+            <span>© 2026 FPN Projesi. Tüm hakları özgür internet topluluğuna aittir.</span>
+            <span id="footer-live-version">Sürüm: v1.0.6 (En Güncel)</span>
+        </div>
+    </footer>
+
+    <!-- App JavaScript -->
+    <script src="app.js"></script>
+</body>
+</html>
