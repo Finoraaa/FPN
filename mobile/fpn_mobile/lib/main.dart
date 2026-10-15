@@ -5,6 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_v2ray/flutter_v2ray.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
+
+const String currentAppVersion = '1.0.4';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -93,6 +96,16 @@ class _FpnHomePageState extends State<FpnHomePage>
   bool autoConnectFastest = false;
   List<String> subscriptionUrls = [];
   bool userIntendedConnected = false;
+
+  // OTA Güncelleme Motoru Değişkenleri
+  bool hasUpdate = false;
+  String? latestVersion;
+  String? updateDownloadUrl;
+  String? updateReleaseNotes;
+  bool isDownloadingUpdate = false;
+  int updateProgress = 0;
+  String updateStatusText = '';
+  Timer? _updateCheckTimer;
 
   // Popüler Türk Bankacılık & Alışveriş Uygulamaları (Split Tunneling için muafiyet listesi)
   static const List<String> defaultBypassApps = [
@@ -184,10 +197,12 @@ class _FpnHomePageState extends State<FpnHomePage>
     )..repeat(reverse: true);
 
     _loadPreferences();
+    _updateCheckTimer = Timer(const Duration(seconds: 2), _checkForUpdates);
   }
 
   @override
   void dispose() {
+    _updateCheckTimer?.cancel();
     _pulseController.dispose();
     super.dispose();
   }
@@ -429,6 +444,171 @@ class _FpnHomePageState extends State<FpnHomePage>
     } else {
       if (!silent) _showToast("Ping testi tamamlandı.");
     }
+  }
+
+  // --- OTA Güncelleme Motoru (GitHub Releases) ---
+  bool _isNewerVersion(String latest, String current) {
+    try {
+      final cleanLatest = latest.replaceAll(RegExp(r'[^0-9.]'), '');
+      final cleanCurrent = current.replaceAll(RegExp(r'[^0-9.]'), '');
+      final lParts = cleanLatest.split('.').map((e) => int.tryParse(e) ?? 0).toList();
+      final cParts = cleanCurrent.split('.').map((e) => int.tryParse(e) ?? 0).toList();
+      for (int i = 0; i < 3; i++) {
+        final l = i < lParts.length ? lParts[i] : 0;
+        final c = i < cParts.length ? cParts[i] : 0;
+        if (l > c) return true;
+        if (l < c) return false;
+      }
+    } catch (_) {}
+    return false;
+  }
+
+  Future<void> _checkForUpdates() async {
+    try {
+      final res = await http.get(
+        Uri.parse('https://api.github.com/repos/Finoraaa/FPN/releases/latest'),
+        headers: {
+          'User-Agent': 'FPN-Mobile-Client',
+          'Accept': 'application/vnd.github.v3+json',
+        },
+      ).timeout(const Duration(seconds: 6));
+
+      if (res.statusCode == 200) {
+        final data = jsonDecode(res.body);
+        final tag = (data['tag_name'] as String? ?? '').replaceFirst('v', '');
+        if (_isNewerVersion(tag, currentAppVersion)) {
+          final assets = data['assets'] as List<dynamic>? ?? [];
+          final apkAsset = assets.firstWhere(
+            (a) => (a['name'] as String? ?? '').endsWith('.apk'),
+            orElse: () => null,
+          );
+
+          if (apkAsset != null && apkAsset['browser_download_url'] != null) {
+            if (mounted) {
+              setState(() {
+                hasUpdate = true;
+                latestVersion = tag;
+                updateDownloadUrl = apkAsset['browser_download_url'] as String;
+                updateReleaseNotes = data['body'] as String? ?? '';
+              });
+            }
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint("Mobil güncelleme kontrol hatası: $e");
+    }
+  }
+
+  Future<void> _startOtaUpdate() async {
+    if (updateDownloadUrl == null) return;
+    _showToast("🚀 FPN APK indirmesi başlatılıyor...");
+    try {
+      final uri = Uri.parse(updateDownloadUrl!);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        _showToast("İndirme bağlantısı açılamadı.");
+      }
+    } catch (e) {
+      _showToast("Hata oluştu: $e");
+    }
+  }
+
+  Widget _buildUpdateBanner() {
+    return Container(
+      margin: const EdgeInsets.only(top: 14, bottom: 6),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF141419),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: const Color(0xFF10B981).withValues(alpha: 0.4),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF10B981).withValues(alpha: 0.1),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF10B981).withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: const Text("🚀", style: TextStyle(fontSize: 16)),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Yeni FPN Sürümü Mevcut: v${latestVersion ?? ''}",
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      (updateReleaseNotes?.split('\n').first.trim().isNotEmpty ?? false)
+                          ? updateReleaseNotes!.split('\n').first.trim()
+                          : "Kararlılık ve hız güncellemelerini almak için tek dokunuşla güncelleyin.",
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: Colors.white60,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.close, size: 16, color: Colors.white54),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                onPressed: () => setState(() => hasUpdate = false),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            height: 38,
+            child: ElevatedButton.icon(
+              onPressed: _startOtaUpdate,
+              icon: const Icon(Icons.bolt, size: 16, color: Colors.black),
+              label: const Text(
+                "Tek Tıkla İndir & Güncelle",
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 12,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF10B981),
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   // --- Abonelik / Sub URL Yöneticisi ---
@@ -1364,6 +1544,9 @@ class _FpnHomePageState extends State<FpnHomePage>
                   ),
                 ],
               ),
+
+              // OTA Güncelleme Bildirim Çubuğu
+              if (hasUpdate) _buildUpdateBanner(),
 
               const Spacer(),
 
