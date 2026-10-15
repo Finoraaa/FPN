@@ -41,6 +41,12 @@ android {
         checkReleaseBuilds = false
         abortOnError = false
     }
+
+    packaging {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
 }
 
 kotlin {
