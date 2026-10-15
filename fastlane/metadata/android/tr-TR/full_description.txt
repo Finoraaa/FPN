@@ -1,0 +1,8 @@
+FPN (Freedom Private Network), internet sansürlerini ve engellerini aşmak için tasarlanmış yeni nesil, gizlilik odaklı, açık kaynaklı bir VPN ve proxy istemcisidir.
+
+Özellikler:
+* Gelişmiş Sansür Engelleme: Normal HTTPS trafiği gibi görünen modern VLESS Reality ve Shadowsocks protokol desteği.
+* Hazır Küresel Düğümler: Otomatik kesinti koruması ve akıllı yönlendirme içeren hazır hızlı sunucular.
+* DNS Koruması: ISS tarafından yapılan DNS müdahalelerini engellemek için şifrelenmiş tünel üzerinden doğrudan DNS iletimi.
+* Sıfır Kayıt (No-Logs): Kullanıcı verisi tutulmaz, izleme/telemetri kütüphaneleri barındırmaz ve %100 açık kaynaktır.
+* Modern Karanlık Arayüz: Tek tıkla bağlanma ve anlık ping takibi sunan şık cam efektli (glassmorphic) tasarım.

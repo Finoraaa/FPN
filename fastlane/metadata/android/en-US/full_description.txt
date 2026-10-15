@@ -1,0 +1,8 @@
+FPN (Freedom Private Network) is a modern, privacy-first, open-source VPN and proxy client designed to circumvent heavy censorship, DPI (Deep Packet Inspection), and network restrictions.
+
+Key Features:
+* Advanced Anti-Censorship: Native support for VLESS Reality and Shadowsocks protocols that mimic regular HTTPS traffic.
+* Pre-configured Global Nodes: Ready-to-use high-speed nodes with automatic failover and smart routing.
+* DNS Protection & Inbound Sniffing: Direct DNS routing through encrypted tunnels to bypass local ISP DNS hijacking.
+* Zero-Logs & Privacy First: No logs, no telemetry, no tracking libraries, and completely open source.
+* Modern Dark-Themed UI: Sleek glassmorphic interface with one-tap connection and live ping monitoring.
