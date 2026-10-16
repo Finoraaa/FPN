@@ -2439,4 +2439,228 @@ body {
     background: rgba(255, 255, 255, 0.1);
 }
 
+/* -------------------------------------------------------------
+   FEEDBACK & COMMUNITY PANEL
+------------------------------------------------------------- */
+.feedback-hero-banner {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(147, 51, 234, 0.1) 100%);
+    border: 1px solid rgba(147, 51, 234, 0.25);
+    border-radius: 20px;
+    padding: 24px 28px;
+    margin-bottom: 24px;
+    backdrop-filter: blur(16px);
+}
+
+.feedback-hero-icon {
+    font-size: 2.8rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.feedback-hero-text h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 6px;
+}
+
+.feedback-hero-text p {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.feedback-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+.feedback-card {
+    background: var(--bg-surface);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--border-subtle);
+    border-radius: 20px;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.feedback-card:hover {
+    transform: translateY(-3px);
+}
+
+.feedback-card.telegram-card {
+    border-color: rgba(34, 158, 217, 0.3);
+}
+
+.feedback-card.telegram-card:hover {
+    border-color: #229ED9;
+    box-shadow: 0 12px 32px rgba(34, 158, 217, 0.15);
+}
+
+.feedback-card.instagram-card {
+    border-color: rgba(225, 48, 108, 0.3);
+}
+
+.feedback-card.instagram-card:hover {
+    border-color: #e1306c;
+    box-shadow: 0 12px 32px rgba(225, 48, 108, 0.15);
+}
+
+.feedback-card-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+
+.platform-icon-badge {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.tg-badge {
+    background: rgba(34, 158, 217, 0.15);
+    color: #229ED9;
+    border: 1px solid rgba(34, 158, 217, 0.3);
+}
+
+.ig-badge {
+    background: linear-gradient(135deg, rgba(240, 148, 51, 0.15), rgba(220, 39, 67, 0.15), rgba(188, 24, 136, 0.15));
+    color: #e1306c;
+    border: 1px solid rgba(225, 48, 108, 0.3);
+}
+
+.tg-chip {
+    background: rgba(34, 158, 217, 0.12) !important;
+    border-color: rgba(34, 158, 217, 0.35) !important;
+    color: #229ED9 !important;
+}
+
+.ig-chip {
+    background: rgba(225, 48, 108, 0.12) !important;
+    border-color: rgba(225, 48, 108, 0.35) !important;
+    color: #ff6584 !important;
+}
+
+.feedback-card-header h3 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 4px 0 0 0;
+}
+
+.feedback-card-desc {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.45;
+    margin-bottom: 16px;
+    min-height: 38px;
+}
+
+.feedback-qr-box {
+    background: #ffffff;
+    padding: 14px;
+    border-radius: 18px;
+    align-self: center;
+    margin: 10px 0 14px 0;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.feedback-qr-img {
+    width: 200px;
+    height: 200px;
+    display: block;
+    object-fit: contain;
+}
+
+.feedback-scan-badge {
+    align-self: center;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 0.76rem;
+    color: var(--text-secondary);
+    margin-bottom: 18px;
+}
+
+.tg-dot {
+    background: #229ED9 !important;
+    box-shadow: 0 0 8px #229ED9;
+}
+
+.ig-dot {
+    background: #e1306c !important;
+    box-shadow: 0 0 8px #e1306c;
+}
+
+.feedback-action-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px 18px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.tg-btn {
+    background: linear-gradient(135deg, #229ED9 0%, #1e87bb 100%) !important;
+    box-shadow: 0 4px 15px rgba(34, 158, 217, 0.3) !important;
+    border: none;
+    color: #ffffff !important;
+}
+
+.tg-btn:hover {
+    box-shadow: 0 6px 20px rgba(34, 158, 217, 0.5) !important;
+    transform: translateY(-2px);
+}
+
+.ig-btn {
+    background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%) !important;
+    box-shadow: 0 4px 15px rgba(220, 39, 67, 0.3) !important;
+    border: none;
+    color: #ffffff !important;
+}
+
+.ig-btn:hover {
+    box-shadow: 0 6px 20px rgba(220, 39, 67, 0.5) !important;
+    transform: translateY(-2px);
+}
+
+@media (max-width: 900px) {
+    .feedback-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 

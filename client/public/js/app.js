@@ -61,6 +61,7 @@ function switchTab(tabId) {
         speedtest: { title: "Dahili Hız Testi", desc: "Cloudflare CDN omurgası üzerinden gerçek indirme hızı ve gecikmeyi ölçün" },
         mobile: { title: "Mobil Cihaza Aktar (QR)", desc: "Telefonunuzla QR kodu okutarak Android veya iPhone'da tek tıkla bağlanın" },
         donate: { title: "Geliştiriciye Destek & Bağış (donatr.ee)", desc: "FPN'in tamamen ücretsiz, sınırsız ve sansürsüz kalmasına katkıda bulunun" },
+        feedback: { title: "Geri Bildirim & Topluluk", desc: "Geri bildirimleriniz ile daha iyi projeler yapacağız. Fikir ve önerilerinizi bizimle paylaşın" },
         settings: { title: "Sansür Koruması & Ayarlar", desc: "DNS over HTTPS, portlar ve Türkiye bölünmüş tünel kurallarını yapılandırın" },
         logs: { title: "Canlı Konsol Kayıtları", desc: "sing-box çekirdeğinin gerçek zamanlı ağ ve tünel etkinlikleri" }
     };
@@ -1122,6 +1123,17 @@ function copyDonateLink() {
 function openDonateBrowser(e) {
     if (e && e.preventDefault) e.preventDefault();
     const url = 'https://donatr.ee/fnora/';
+    fetch(API_BASE + '/api/open-external', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url })
+    }).catch(() => {});
+    window.open(url, '_blank');
+}
+
+function openExternalUrl(e, url) {
+    if (e && e.preventDefault) e.preventDefault();
+    if (!url) return;
     fetch(API_BASE + '/api/open-external', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
