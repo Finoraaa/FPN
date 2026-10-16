@@ -2571,66 +2571,146 @@ body {
     font-size: 0.85rem;
     color: var(--text-secondary);
     line-height: 1.45;
-    margin-bottom: 16px;
-    min-height: 38px;
+    margin-bottom: 14px;
 }
 
-.feedback-qr-box {
-    background: #ffffff;
-    padding: 14px;
-    border-radius: 18px;
-    align-self: center;
-    margin: 10px 0 14px 0;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+.social-icon-display-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 20px;
+    border-radius: 20px;
+    margin: 8px 0 16px 0;
+    transition: all 0.3s ease;
+}
+
+.tg-display-box {
+    background: radial-gradient(circle at center, rgba(34, 158, 217, 0.15) 0%, rgba(15, 23, 42, 0.4) 100%);
+    border: 1px solid rgba(34, 158, 217, 0.25);
+}
+
+.ig-display-box {
+    background: radial-gradient(circle at center, rgba(225, 48, 108, 0.15) 0%, rgba(15, 23, 42, 0.4) 100%);
+    border: 1px solid rgba(225, 48, 108, 0.25);
+}
+
+.social-icon-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 22px;
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-bottom: 12px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.feedback-qr-img {
-    width: 200px;
-    height: 200px;
-    display: block;
-    object-fit: contain;
+.tg-avatar {
+    background: linear-gradient(135deg, #229ED9 0%, #1778a8 100%);
+    color: #ffffff;
+    box-shadow: 0 10px 24px rgba(34, 158, 217, 0.35);
 }
 
-.feedback-scan-badge {
-    align-self: center;
-    display: inline-flex;
+.ig-avatar {
+    background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+    color: #ffffff;
+    box-shadow: 0 10px 24px rgba(220, 39, 67, 0.35);
+}
+
+.feedback-card:hover .social-icon-avatar {
+    transform: scale(1.06);
+}
+
+.social-handle-tag {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.social-meta-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+}
+
+.meta-pill {
+    font-size: 0.74rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: var(--text-secondary);
+}
+
+.feedback-perks {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 18px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.perk-item {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    display: flex;
     align-items: center;
     gap: 8px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 6px 14px;
-    border-radius: 999px;
-    font-size: 0.76rem;
-    color: var(--text-secondary);
-    margin-bottom: 18px;
 }
 
-.tg-dot {
-    background: #229ED9 !important;
-    box-shadow: 0 0 8px #229ED9;
-}
-
-.ig-dot {
-    background: #e1306c !important;
-    box-shadow: 0 0 8px #e1306c;
+.feedback-actions-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: auto;
 }
 
 .feedback-action-btn {
-    width: 100%;
+    flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
-    padding: 12px 18px;
-    font-size: 0.88rem;
+    gap: 8px;
+    padding: 12px 14px;
+    font-size: 0.86rem;
     font-weight: 600;
     text-decoration: none;
     border-radius: 12px;
     cursor: pointer;
     transition: all 0.25s ease;
+    white-space: nowrap;
+}
+
+.feedback-copy-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 12px 14px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #e2e8f0;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    white-space: nowrap;
+}
+
+.feedback-copy-btn:hover {
+    background: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: #ffffff;
+    transform: translateY(-2px);
 }
 
 .tg-btn {
@@ -2660,6 +2740,12 @@ body {
 @media (max-width: 900px) {
     .feedback-grid {
         grid-template-columns: 1fr;
+    }
+    .feedback-actions-row {
+        flex-direction: column;
+    }
+    .feedback-action-btn, .feedback-copy-btn {
+        width: 100%;
     }
 }
 

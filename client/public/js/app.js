@@ -1142,6 +1142,18 @@ function openExternalUrl(e, url) {
     window.open(url, '_blank');
 }
 
+function copyFeedbackHandle(text, label) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+            showToast(`📋 ${label || 'Kullanıcı adı'} panoya kopyalandı: ${text}`);
+        }).catch(() => {
+            prompt('Kullanıcı adını kopyalayın:', text);
+        });
+    } else {
+        prompt('Kullanıcı adını kopyalayın:', text);
+    }
+}
+
 // -------------------------------------------------------------
 // Speedtest
 // -------------------------------------------------------------
