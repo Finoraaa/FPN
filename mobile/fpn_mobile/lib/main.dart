@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 
-const String currentAppVersion = '1.0.8';
+const String currentAppVersion = '1.0.9';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();

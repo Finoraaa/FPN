@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ====================================================================
-#  FPN System & Browser Proxy Controller (v1.0.8)
+#  FPN System & Browser Proxy Controller (v1.0.9)
 #  Bulletproof Cross-Desktop & Cross-Browser Proxy Automation
 #  Supports: GNOME, KDE Plasma 5/6, XFCE/MATE, Flatpak, Zen Browser,
 #            Firefox, Floorp, LibreWolf, Waterfox & Chromium Browsers
