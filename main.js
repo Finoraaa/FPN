@@ -248,3 +248,17 @@ app.on('window-all-closed', () => {
         app.quit();
     }
 });
+
+process.on('SIGINT', async () => {
+    if (backendService && typeof backendService.setSystemProxy === 'function') {
+        try { backendService.setSystemProxy(false, 2080, true); } catch (e) {}
+    }
+    app.quit();
+});
+
+process.on('SIGTERM', async () => {
+    if (backendService && typeof backendService.setSystemProxy === 'function') {
+        try { backendService.setSystemProxy(false, 2080, true); } catch (e) {}
+    }
+    app.quit();
+});

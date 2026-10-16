@@ -143,9 +143,19 @@ async function checkBackendSync() {
             }
         }
     } catch (e) {
-        // Backend offline
+        // Backend offline: If proxy was active through backend, auto-disable to prevent losing internet
+        browserAPI.storage.local.get(['standaloneProxyActive'], (r) => {
+            if (!r || !r.standaloneProxyActive) {
+                if (isProxyActive) {
+                    disableProxy();
+                }
+            }
+        });
     }
 }
+
+// Check every 3 seconds to ensure browser is never stranded if desktop backend closes
+setInterval(checkBackendSync, 3000);
 
 chrome.runtime.onInstalled.addListener(() => {
     updateBadge(false);

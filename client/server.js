@@ -9,7 +9,7 @@ const http = require('http');
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
-const { spawn, exec } = require('child_process');
+const { spawn, exec, execSync } = require('child_process');
 const net = require('net');
 const tls = require('tls');
 const dns = require('dns').promises;
@@ -86,7 +86,7 @@ if (!isWin) {
 
 
 // Application Version
-let appVersion = '1.0.7';
+let appVersion = '1.0.8';
 try {
     const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
     if (pkg && pkg.version) appVersion = pkg.version;
@@ -792,39 +792,71 @@ function fetchCommunityVlessNodes() {
     });
 }
 
-function setSystemProxy(enable, port) {
+function setSystemProxy(enable, port, isSync = false) {
+    const p = port || 2080;
     const action = enable ? 'on' : 'off';
     if (process.platform === 'win32') {
-        const proxyServer = `127.0.0.1:${port}`;
+        const proxyServer = `127.0.0.1:${p}`;
         if (enable) {
-            exec(`reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings" /v ProxyEnable /t REG_DWORD /d 1 /f && reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings" /v ProxyServer /t REG_SZ /d "${proxyServer}" /f`, (err) => {
-                if (err) appendLog(`Windows Proxy hatası: ${err.message}`);
-                else appendLog(`Windows Sistem Proxy aktif edildi: ${proxyServer}`);
-            });
+            const cmd = `reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings" /v ProxyEnable /t REG_DWORD /d 1 /f && ` +
+                        `reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings" /v ProxyServer /t REG_SZ /d "${proxyServer}" /f && ` +
+                        `reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings" /v ProxyOverride /t REG_SZ /d "<local>;127.0.0.1;localhost" /f && ` +
+                        `powershell -NoProfile -NonInteractive -Command "$s='[DllImport(\\\"wininet.dll\\\")]public static extern bool InternetSetOption(IntPtr h,int o,IntPtr b,int l);';Add-Type -MemberDefinition $s -Name W -Namespace N;$null=[N.W]::InternetSetOption(0,39,0,0);$null=[N.W]::InternetSetOption(0,37,0,0);" 2>nul || true`;
+            if (isSync) {
+                try { execSync(cmd, { stdio: 'ignore' }); } catch (e) {}
+            } else {
+                exec(cmd, (err) => {
+                    if (err) appendLog(`Windows Proxy hatası: ${err.message}`);
+                    else appendLog(`Windows Sistem Proxy aktif edildi: ${proxyServer}`);
+                });
+            }
         } else {
-            exec(`reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings" /v ProxyEnable /t REG_DWORD /d 0 /f`, (err) => {
-                if (err) appendLog(`Windows Proxy hatası: ${err.message}`);
-                else appendLog(`Windows Sistem Proxy devre dışı bırakıldı.`);
-            });
+            const cmd = `reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings" /v ProxyEnable /t REG_DWORD /d 0 /f && ` +
+                        `reg delete "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings" /v ProxyServer /f 2>nul || true && ` +
+                        `reg delete "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings" /v AutoConfigURL /f 2>nul || true && ` +
+                        `netsh winhttp reset proxy 2>nul || true && ` +
+                        `powershell -NoProfile -NonInteractive -Command "$s='[DllImport(\\\"wininet.dll\\\")]public static extern bool InternetSetOption(IntPtr h,int o,IntPtr b,int l);';Add-Type -MemberDefinition $s -Name W -Namespace N;$null=[N.W]::InternetSetOption(0,39,0,0);$null=[N.W]::InternetSetOption(0,37,0,0);" 2>nul || true`;
+            if (isSync) {
+                try { execSync(cmd, { stdio: 'ignore' }); } catch (e) {}
+            } else {
+                exec(cmd, (err) => {
+                    if (err) appendLog(`Windows Proxy hatası: ${err.message}`);
+                    else appendLog(`Windows Sistem Proxy devre dışı bırakıldı.`);
+                });
+            }
         }
     } else if (process.platform === 'darwin') {
-        const dev = 'Wi-Fi';
         if (enable) {
-            exec(`networksetup -setwebproxy "${dev}" 127.0.0.1 ${port} && networksetup -setsecurewebproxy "${dev}" 127.0.0.1 ${port} && networksetup -setsocksfirewallproxy "${dev}" 127.0.0.1 ${port}`, (err) => {
-                if (err) appendLog(`macOS Proxy hatası: ${err.message}`);
-                else appendLog(`macOS Sistem Proxy aktif edildi: 127.0.0.1:${port}`);
-            });
+            const cmd = `services=$(networksetup -listallnetworkservices 2>/dev/null | grep -v '\\*' | grep -v '^$'); while IFS= read -r s; do [ -n "$s" ] || continue; networksetup -setwebproxy "$s" 127.0.0.1 ${p} 2>/dev/null || true; networksetup -setsecurewebproxy "$s" 127.0.0.1 ${p} 2>/dev/null || true; networksetup -setsocksfirewallproxy "$s" 127.0.0.1 ${p} 2>/dev/null || true; networksetup -setproxybypassdomains "$s" localhost 127.0.0.1 "*.local" 2>/dev/null || true; done <<< "$services"`;
+            if (isSync) {
+                try { execSync(cmd, { shell: '/bin/bash', stdio: 'ignore' }); } catch (e) {}
+            } else {
+                exec(cmd, { shell: '/bin/bash' }, (err) => {
+                    if (err) appendLog(`macOS Proxy hatası: ${err.message}`);
+                    else appendLog(`macOS Sistem Proxy aktif edildi: 127.0.0.1:${p}`);
+                });
+            }
         } else {
-            exec(`networksetup -setwebproxystate "${dev}" off && networksetup -setsecurewebproxystate "${dev}" off && networksetup -setsocksfirewallproxystate "${dev}" off`, (err) => {
-                if (err) appendLog(`macOS Proxy hatası: ${err.message}`);
-                else appendLog(`macOS Sistem Proxy kapatıldı.`);
-            });
+            const cmd = `services=$(networksetup -listallnetworkservices 2>/dev/null | grep -v '\\*' | grep -v '^$'); while IFS= read -r s; do [ -n "$s" ] || continue; networksetup -setwebproxystate "$s" off 2>/dev/null || true; networksetup -setsecurewebproxystate "$s" off 2>/dev/null || true; networksetup -setsocksfirewallproxystate "$s" off 2>/dev/null || true; networksetup -setautoproxystate "$s" off 2>/dev/null || true; done <<< "$services"`;
+            if (isSync) {
+                try { execSync(cmd, { shell: '/bin/bash', stdio: 'ignore' }); } catch (e) {}
+            } else {
+                exec(cmd, { shell: '/bin/bash' }, (err) => {
+                    if (err) appendLog(`macOS Proxy hatası: ${err.message}`);
+                    else appendLog(`macOS Sistem Proxy kapatıldı.`);
+                });
+            }
         }
     } else {
-        exec(`"${PROXY_SCRIPT_PATH}" ${action} ${port}`, (err, stdout) => {
-            if (err) appendLog(`Sistem Proxy hatası: ${err.message}`);
-            else appendLog(`Sistem Proxy ayarlandı: ${stdout ? stdout.trim() : action}`);
-        });
+        const cmd = `"${PROXY_SCRIPT_PATH}" ${action} ${p}`;
+        if (isSync) {
+            try { execSync(cmd, { stdio: 'ignore' }); } catch (e) {}
+        } else {
+            exec(cmd, (err, stdout) => {
+                if (err) appendLog(`Sistem Proxy hatası: ${err.message}`);
+                else appendLog(`Sistem Proxy ayarlandı: ${stdout ? stdout.trim() : action}`);
+            });
+        }
     }
 }
 
@@ -957,9 +989,8 @@ async function stopVpn() {
     appendLog("FPN Bağlantısı kesiliyor...");
     const settings = getSettings();
 
-    if (settings.autoSetSystemProxy) {
-        setSystemProxy(false, settings.mixedPort);
-    }
+    // Always ensure system and browser proxies are cleanly disabled
+    setSystemProxy(false, settings.mixedPort || 2080);
 
     if (singboxProcess) {
         await new Promise((resolve) => {
@@ -1389,7 +1420,7 @@ async function scanCleanIps() {
  * Ağ Doktoru / Acil Kurtarma (Tüm proxy ayarlarını sıfırlar ve tüneli durdurur)
  */
 async function runNetworkDoctor() {
-    appendLog("🩺 Ağ Doktoru çalıştırılıyor: Tünel sonlandırılıyor ve sistem proxy ayarları sıfırlanıyor...");
+    appendLog("🩺 Ağ Doktoru çalıştırılıyor: Tünel sonlandırılıyor, tüm sistem ve tarayıcı proxy ayarları sıfırlanıyor...");
     if (singboxProcess) {
         try { singboxProcess.kill('SIGKILL'); } catch (e) {}
         singboxProcess = null;
@@ -1398,11 +1429,14 @@ async function runNetworkDoctor() {
     connectStartTime = null;
 
     if (process.platform === 'linux') {
-        try { exec('pkill -9 sing-box'); } catch (e) {}
+        try { execSync('pkill -9 sing-box 2>/dev/null || true'); } catch (e) {}
+    } else if (process.platform === 'win32') {
+        try { execSync('taskkill /F /IM sing-box.exe 2>nul || true'); } catch (e) {}
     }
 
     const settings = getSettings();
-    setSystemProxy(false, settings.mixedPort || 2080);
+    const port = settings.mixedPort || 2080;
+    setSystemProxy(false, port, true);
 
     try {
         if (fs.existsSync(RUNTIME_CONFIG_PATH)) fs.unlinkSync(RUNTIME_CONFIG_PATH);
@@ -1414,11 +1448,11 @@ async function runNetworkDoctor() {
         internetOk = true;
     } catch (e) {}
 
-    appendLog(`✅ Ağ Doktoru tamamlandı. İnternet erişimi: ${internetOk ? 'Normal' : 'Kontrol Gerekli'}`);
+    appendLog(`✅ Ağ Doktoru tamamlandı. Tüm sistem ve tarayıcı (Zen, Firefox, Chrome vs.) ayarları onarıldı. İnternet: ${internetOk ? 'Normal' : 'Kontrol Gerekli'}`);
     return {
         success: true,
         internetOk,
-        message: "Proxy ve tünel ayarları başarıyla sıfırlandı."
+        message: "Tüm sistem ve tarayıcı proxy ayarları başarıyla sıfırlandı ve onarıldı."
     };
 }
 
@@ -2179,15 +2213,35 @@ const server = http.createServer(async (req, res) => {
     });
 });
 
-// Process cleanup on exit
+// Emergency synchronous reset when process exits or is terminated
+function emergencyProxyResetSync() {
+    try {
+        const settings = getSettings();
+        setSystemProxy(false, settings.mixedPort || 2080, true);
+    } catch (e) {}
+}
+
+process.on('exit', () => {
+    emergencyProxyResetSync();
+});
+
+// Process cleanup on signals
 process.on('SIGINT', async () => {
     console.log("\nKapatılıyor...");
-    await stopVpn();
+    emergencyProxyResetSync();
+    try { await stopVpn(); } catch (e) {}
     process.exit(0);
 });
 
 process.on('SIGTERM', async () => {
-    await stopVpn();
+    emergencyProxyResetSync();
+    try { await stopVpn(); } catch (e) {}
+    process.exit(0);
+});
+
+process.on('SIGHUP', async () => {
+    emergencyProxyResetSync();
+    try { await stopVpn(); } catch (e) {}
     process.exit(0);
 });
 
@@ -2199,11 +2253,26 @@ server.on('error', (err) => {
     }
 });
 
+// Startup Self-Healing (cleans any leftover proxies from previous crashes)
+function selfHealProxiesOnStartup() {
+    try {
+        const settings = getSettings();
+        const port = settings.mixedPort || 2080;
+        if (!isConnected) {
+            setSystemProxy(false, port, false);
+            appendLog("🛡️ Sistem ve tarayıcı proxy ayarları denetlendi: Doğrudan ve güvenli bağlantı sağlandı.");
+        }
+    } catch (e) {
+        appendLog(`Proxy başlangıç denetim uyarısı: ${e.message}`);
+    }
+}
+
 server.listen(PORT, '127.0.0.1', () => {
     appendLog("🚀 FPN Çekirdek Kontrol Merkezi Başlatıldı.");
     appendLog(`📂 Veri Deposu: ${DATA_DIR}`);
     appendLog(`⚙️ sing-box Çekirdeği: ${BIN_PATH}`);
     appendLog("🛡️ Sistem hazır. Bağlan butonuna basarak tüneli başlatabilirsiniz.");
+    selfHealProxiesOnStartup();
     console.log(`=======================================================`);
     console.log(`🚀 FPN Desktop Kontrol Merkezi Hazır!`);
     console.log(`🔗 Web Arayüzü: http://127.0.0.1:${PORT}`);
