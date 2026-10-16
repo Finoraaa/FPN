@@ -78,27 +78,14 @@ set_kde_off() {
     fi
 }
 
-# 3. Flatpak Overrides for Browsers
-FLATPAK_APPS=(
-    "app.zen_browser.zen"
-    "org.mozilla.firefox"
-    "io.gitlab.librewolf-community"
-    "one.ablaze.floorp"
-    "net.waterfox.waterfox"
-    "com.brave.Browser"
-    "com.google.Chrome"
-    "org.chromium.Chromium"
-    "com.microsoft.Edge"
-    "com.opera.Opera"
-    "com.vivaldi.Vivaldi"
-)
-
+# 3. Flatpak Overrides Cleanup
+# Flatpak overrides must NOT be used for dynamic proxy routing because:
+#  - Running Flatpak instances do not pick up runtime override changes.
+#  - Any instance launched during proxy stays permanently poisoned to 127.0.0.1.
+# System proxies (GNOME GSettings, KDE kioslaverc) and TUN mode are the clean solutions.
 set_flatpak_on() {
-    if command -v flatpak >/dev/null 2>&1; then
-        for app in "${FLATPAK_APPS[@]}"; do
-            flatpak override --user --env=http_proxy="http://$HOST:$PORT" --env=https_proxy="http://$HOST:$PORT" --env=all_proxy="socks5://$HOST:$PORT" "$app" 2>/dev/null || true
-        done
-    fi
+    # Do not write disk overrides to avoid poisoning running/restarting Flatpak apps
+    :
 }
 
 set_flatpak_off() {
@@ -108,6 +95,7 @@ set_flatpak_off() {
         done
         for ovr in "$HOME/.local/share/flatpak/overrides/"*; do
             if [ -f "$ovr" ]; then
+                sed -i '/unset-environment=.*proxy/d' "$ovr" 2>/dev/null || true
                 sed -i '/^http_proxy=/d; /^https_proxy=/d; /^all_proxy=/d' "$ovr" 2>/dev/null || true
             fi
         done
@@ -116,9 +104,8 @@ set_flatpak_off() {
 
 # 4. Browser Profile Self-Healing & Sanity Maintenance
 # (Zen Browser, Firefox, Floorp, LibreWolf, Waterfox)
-# RULE: Never hardcode `network.proxy.type = 1` into user profile files.
-# All Gecko browsers must remain on `type = 5` (Use System Proxy Settings)
-# so they dynamically obey GNOME/KDE/Flatpak proxies without bricking when FPN stops.
+# RULE: Reset any stuck proxy in Gecko profiles to 0 (No proxy / Direct Connection).
+# This ensures that browsers NEVER get stuck waiting for 127.0.0.1:2080.
 heal_and_clean_gecko_profiles() {
     local search_paths=(
         "$HOME/.var/app/app.zen_browser.zen/.zen"
@@ -146,26 +133,23 @@ heal_and_clean_gecko_profiles() {
         local ujs="$pdir/user.js"
         local pjs="$pdir/prefs.js"
 
-        # 1. Clean user.js: remove any leftover FPN blocks or manual 127.0.0.1 proxies
-        if [ -f "$ujs" ]; then
-            sed -i '/\/\/ --- FPN PROXY CONFIG START ---/,/\/\/ --- FPN PROXY CONFIG END ---/d' "$ujs" 2>/dev/null || true
-            sed -i '/\/\/ FPN Proxy Reset/,+10d' "$ujs" 2>/dev/null || true
-            sed -i '/user_pref("network\.proxy\./d' "$ujs" 2>/dev/null || true
-            # Delete user.js if empty or only whitespace
-            if ! grep -q '[^[:space:]]' "$ujs" 2>/dev/null; then
-                rm -f "$ujs" 2>/dev/null || true
-            fi
-        fi
+        # 1. Enforce user.js direct connection shield so browser always starts clean
+        cat << 'EOF' > "$ujs"
+// FPN Safe Direct Connection
+user_pref("network.proxy.type", 0);
+user_pref("network.proxy.http", "");
+user_pref("network.proxy.http_port", 0);
+user_pref("network.proxy.ssl", "");
+user_pref("network.proxy.ssl_port", 0);
+user_pref("network.proxy.socks", "");
+user_pref("network.proxy.socks_port", 0);
+user_pref("network.proxy.socks_remote_dns", false);
+EOF
 
-        # 2. Heal prefs.js: reset stuck manual proxy to System Proxy (5)
+        # 2. Heal prefs.js: strip any stuck 127.0.0.1 proxies and enforce type 0
         if [ -f "$pjs" ]; then
-            # If prefs.js is pointing to localhost / 127.0.0.1 proxy, revert to system proxy (5)
-            if grep -q '127\.0\.0\.1' "$pjs" 2>/dev/null || grep -q '"network\.proxy\.type", 1' "$pjs" 2>/dev/null; then
-                sed -i 's/user_pref("network\.proxy\.type", [0-9]);/user_pref("network\.proxy\.type", 5);/g' "$pjs" 2>/dev/null || true
-                sed -i '/user_pref("network\.proxy\.http/d' "$pjs" 2>/dev/null || true
-                sed -i '/user_pref("network\.proxy\.ssl/d' "$pjs" 2>/dev/null || true
-                sed -i '/user_pref("network\.proxy\.socks/d' "$pjs" 2>/dev/null || true
-            fi
+            sed -i '/user_pref("network\.proxy\./d' "$pjs" 2>/dev/null || true
+            echo 'user_pref("network.proxy.type", 0);' >> "$pjs"
         fi
     done
 }
