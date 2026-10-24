@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_v2ray/flutter_v2ray.dart';
@@ -186,10 +187,16 @@ class _FpnHomePageState extends State<FpnHomePage>
       },
     );
 
-    flutterV2ray.initializeV2Ray(
-      notificationIconResourceType: "mipmap",
-      notificationIconResourceName: "ic_launcher",
-    );
+    if (Platform.isAndroid) {
+      try {
+        flutterV2ray.initializeV2Ray(
+          notificationIconResourceType: "mipmap",
+          notificationIconResourceName: "ic_launcher",
+        );
+      } catch (e) {
+        debugPrint("V2Ray init error: $e");
+      }
+    }
 
     _pulseController = AnimationController(
       vsync: this,
@@ -343,7 +350,27 @@ class _FpnHomePageState extends State<FpnHomePage>
     }
   }
 
+  Future<int> _pingNodeSocket(String vlessUri) async {
+    try {
+      final uri = Uri.parse(vlessUri);
+      final host = uri.host;
+      final port = uri.port > 0 ? uri.port : 443;
+      if (host.isEmpty) return -1;
+      final sw = Stopwatch()..start();
+      final socket = await Socket.connect(host, port, timeout: const Duration(milliseconds: 2500));
+      socket.destroy();
+      return sw.elapsedMilliseconds;
+    } catch (_) {
+      return -1;
+    }
+  }
+
   Future<void> toggleConnection() async {
+    if (Platform.isIOS) {
+      _showIOSConnectionSheet(selectedNode);
+      return;
+    }
+
     if (isConnected) {
       userIntendedConnected = false;
       await flutterV2ray.stopV2Ray();
@@ -392,15 +419,20 @@ class _FpnHomePageState extends State<FpnHomePage>
 
   Future<void> _testLatency() async {
     try {
+      if (Platform.isIOS) {
+        final delay = await _pingNodeSocket(selectedNode.vlessUri);
+        if (mounted) setState(() => currentPing = delay);
+        return;
+      }
       if (isConnected) {
         final delay = await flutterV2ray.getConnectedServerDelay();
-        setState(() => currentPing = delay);
+        if (mounted) setState(() => currentPing = delay);
       } else {
         final V2RayURL v2rayUrl =
             FlutterV2ray.parseFromURL(selectedNode.vlessUri);
         final delay = await flutterV2ray.getServerDelay(
             config: _optimizeV2RayConfig(v2rayUrl.getFullConfiguration()));
-        setState(() => currentPing = delay);
+        if (mounted) setState(() => currentPing = delay);
       }
     } catch (_) {}
   }
@@ -416,9 +448,14 @@ class _FpnHomePageState extends State<FpnHomePage>
 
     for (final node in nodes) {
       try {
-        final parsed = FlutterV2ray.parseFromURL(node.vlessUri);
-        final delay = await flutterV2ray.getServerDelay(
-            config: _optimizeV2RayConfig(parsed.getFullConfiguration()));
+        int delay = -1;
+        if (Platform.isIOS) {
+          delay = await _pingNodeSocket(node.vlessUri);
+        } else {
+          final parsed = FlutterV2ray.parseFromURL(node.vlessUri);
+          delay = await flutterV2ray.getServerDelay(
+              config: _optimizeV2RayConfig(parsed.getFullConfiguration()));
+        }
         node.ping = delay;
         if (delay > 0 && delay < minDelay) {
           minDelay = delay;
@@ -681,11 +718,124 @@ class _FpnHomePageState extends State<FpnHomePage>
 
   Future<void> _openBrowser(String url) async {
     try {
+      final uri = Uri.parse(url);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+        return;
+      }
+    } catch (_) {}
+    try {
       await _appChannel.invokeMethod('openUrl', {'url': url});
     } catch (_) {
       await Clipboard.setData(ClipboardData(text: url));
       _showToast("Bağlantı panoya kopyalandı!");
     }
+  }
+
+  void _showIOSConnectionSheet(FpnNode node) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF121217),
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 42,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.white24,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 18),
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF38BDF8).withValues(alpha: 0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.apple, color: Color(0xFF38BDF8), size: 24),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "iOS Bağlantı Asistanı",
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                        ),
+                        Text(
+                          "${node.flag} ${node.name}",
+                          style: TextStyle(fontSize: 13, color: Colors.white.withValues(alpha: 0.7)),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.04),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+                ),
+                child: Text(
+                  "Apple iOS mimarisi gereği VLESS & Reality protokolleri App Store üzerindeki FoXray veya Streisand istemcileriyle tek dokunuşla kullanılır.",
+                  style: TextStyle(fontSize: 13, color: Colors.white.withValues(alpha: 0.8), height: 1.4),
+                ),
+              ),
+              const SizedBox(height: 18),
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF10B981),
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size.fromHeight(48),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+                icon: const Icon(Icons.copy_rounded, size: 20),
+                label: const Text("VLESS Bağlantısını Kopyala", style: TextStyle(fontWeight: FontWeight.bold)),
+                onPressed: () {
+                  Navigator.pop(context);
+                  Clipboard.setData(ClipboardData(text: node.vlessUri));
+                  _showToast("✅ ${node.name} bağlantısı panoya kopyalandı!");
+                },
+              ),
+              const SizedBox(height: 10),
+              OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFF38BDF8),
+                  side: const BorderSide(color: Color(0xFF38BDF8)),
+                  minimumSize: const Size.fromHeight(48),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+                icon: const Icon(Icons.open_in_new_rounded, size: 20),
+                label: const Text("FoXray'i App Store'da Aç", style: TextStyle(fontWeight: FontWeight.bold)),
+                onPressed: () {
+                  Navigator.pop(context);
+                  _openBrowser("https://apps.apple.com/app/foxray/id6448898396");
+                },
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   void _showFeedbackModal() {

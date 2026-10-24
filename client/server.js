@@ -16,6 +16,8 @@ const dns = require('dns').promises;
 
 const PORT = 4040;
 const isWin = process.platform === 'win32';
+const isMac = process.platform === 'darwin';
+const isLinux = process.platform === 'linux';
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const BUNDLED_DATA_DIR = path.join(__dirname, 'data');
 
@@ -71,7 +73,67 @@ function resolveResourcePath(relSubPath) {
     return devCandidate;
 }
 
-const BIN_PATH = resolveResourcePath(path.join('bin', isWin ? 'sing-box.exe' : 'sing-box'));
+function resolveBinPath() {
+    let targetName = 'sing-box';
+    if (isWin) {
+        targetName = 'sing-box.exe';
+    } else if (isMac) {
+        targetName = (process.arch === 'arm64') ? 'sing-box-darwin-arm64' : 'sing-box-darwin-amd64';
+    }
+
+    let bundledCandidate = resolveResourcePath(path.join('bin', targetName));
+    if (isMac && !fs.existsSync(bundledCandidate)) {
+        const fallback = resolveResourcePath(path.join('bin', 'sing-box'));
+        if (fs.existsSync(fallback)) bundledCandidate = fallback;
+    }
+
+    // On Linux and POSIX systems (especially AppImage where bundle is in read-only SquashFS mount),
+    // copy binary to DATA_DIR/bin to allow pkexec setcap (TUN mode) and in-place persistence.
+    const userBinDir = path.join(DATA_DIR, 'bin');
+    const userBinFile = path.join(userBinDir, isWin ? 'sing-box.exe' : 'sing-box');
+
+    try {
+        if (!fs.existsSync(userBinDir)) {
+            fs.mkdirSync(userBinDir, { recursive: true });
+        }
+
+        if (fs.existsSync(bundledCandidate)) {
+            let needCopy = false;
+            if (!fs.existsSync(userBinFile)) {
+                needCopy = true;
+            } else {
+                const bStat = fs.statSync(bundledCandidate);
+                const uStat = fs.statSync(userBinFile);
+                if (bStat.size !== uStat.size) {
+                    needCopy = true;
+                }
+            }
+
+            if (needCopy) {
+                fs.copyFileSync(bundledCandidate, userBinFile);
+                if (!isWin) {
+                    fs.chmodSync(userBinFile, 0o755);
+                }
+            }
+        }
+    } catch (e) {
+        console.error("Binary sync to DATA_DIR error:", e.message);
+    }
+
+    if (fs.existsSync(userBinFile)) {
+        if (!isWin) {
+            try { fs.chmodSync(userBinFile, 0o755); } catch (e) {}
+        }
+        return userBinFile;
+    }
+
+    if (!isWin && fs.existsSync(bundledCandidate)) {
+        try { fs.chmodSync(bundledCandidate, 0o755); } catch (e) {}
+    }
+    return bundledCandidate;
+}
+
+const BIN_PATH = resolveBinPath();
 const PROXY_SCRIPT_PATH = resolveResourcePath(path.join('scripts', 'set-system-proxy.sh'));
 
 // Ensure executable permissions on POSIX
@@ -81,6 +143,16 @@ if (!isWin) {
     } catch (e) {}
     try {
         if (fs.existsSync(PROXY_SCRIPT_PATH)) fs.chmodSync(PROXY_SCRIPT_PATH, 0o755);
+    } catch (e) {}
+}
+
+function killSingBoxProcesses() {
+    try {
+        if (isWin) {
+            execSync('taskkill /F /IM sing-box.exe >nul 2>&1', { windowsHide: true });
+        } else {
+            execSync('pkill -f "sing-box" 2>/dev/null || true');
+        }
     } catch (e) {}
 }
 
@@ -169,15 +241,20 @@ function getNodes() {
         if (fs.existsSync(filePath)) {
             const content = fs.readFileSync(filePath, 'utf8');
             if (content && content.trim()) {
-                return JSON.parse(content);
+                const parsed = JSON.parse(content);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    return parsed;
+                }
             }
         }
         // Fallback to bundled template nodes
         const bundledPath = path.join(BUNDLED_DATA_DIR, 'nodes.json');
         if (fs.existsSync(bundledPath)) {
             const bundledData = JSON.parse(fs.readFileSync(bundledPath, 'utf8'));
-            saveNodes(bundledData);
-            return bundledData;
+            if (Array.isArray(bundledData) && bundledData.length > 0) {
+                saveNodes(bundledData);
+                return bundledData;
+            }
         }
     } catch (e) {
         console.error("Error reading nodes:", e.message);
@@ -195,6 +272,7 @@ function saveNodes(nodes) {
 }
 
 function hasTunCapability() {
+    if (!isLinux) return true; // Non-Linux systems use OS-level drivers / system proxy
     try {
         const out = require('child_process').execSync(`getcap "${BIN_PATH}" 2>/dev/null`, { encoding: 'utf8' });
         return out.includes('cap_net_admin');
@@ -795,39 +873,48 @@ function fetchCommunityVlessNodes() {
 function setSystemProxy(enable, port, isSync = false) {
     const p = port || 2080;
     const action = enable ? 'on' : 'off';
-    if (process.platform === 'win32') {
+    if (isWin) {
         const proxyServer = `127.0.0.1:${p}`;
         if (enable) {
-            const cmd = `reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings" /v ProxyEnable /t REG_DWORD /d 1 /f && ` +
-                        `reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings" /v ProxyServer /t REG_SZ /d "${proxyServer}" /f && ` +
-                        `reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings" /v ProxyOverride /t REG_SZ /d "<local>;127.0.0.1;localhost" /f && ` +
-                        `powershell -NoProfile -NonInteractive -Command "$s='[DllImport(\\\"wininet.dll\\\")]public static extern bool InternetSetOption(IntPtr h,int o,IntPtr b,int l);';Add-Type -MemberDefinition $s -Name W -Namespace N;$null=[N.W]::InternetSetOption(0,39,0,0);$null=[N.W]::InternetSetOption(0,37,0,0);" 2>nul || true`;
+            const cmd = [
+                `reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings" /v ProxyEnable /t REG_DWORD /d 1 /f`,
+                `reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings" /v ProxyServer /t REG_SZ /d "${proxyServer}" /f`,
+                `reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings" /v ProxyOverride /t REG_SZ /d "<local>;127.0.0.1;localhost" /f`,
+                `powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command "$s='[DllImport(\\\"wininet.dll\\\")]public static extern bool InternetSetOption(IntPtr h,int o,IntPtr b,int l);';Add-Type -MemberDefinition $s -Name W -Namespace N;$null=[N.W]::InternetSetOption(0,39,0,0);$null=[N.W]::InternetSetOption(0,37,0,0);"`
+            ].map(c => `${c} >nul 2>&1`).join(' & ');
+
             if (isSync) {
-                try { execSync(cmd, { stdio: 'ignore' }); } catch (e) {}
+                try { execSync(cmd, { windowsHide: true, stdio: 'ignore' }); } catch (e) {}
             } else {
-                exec(cmd, (err) => {
+                exec(cmd, { windowsHide: true }, (err) => {
                     if (err) appendLog(`Windows Proxy hatası: ${err.message}`);
                     else appendLog(`Windows Sistem Proxy aktif edildi: ${proxyServer}`);
                 });
             }
         } else {
-            const cmd = `reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings" /v ProxyEnable /t REG_DWORD /d 0 /f && ` +
-                        `reg delete "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings" /v ProxyServer /f 2>nul || true && ` +
-                        `reg delete "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings" /v AutoConfigURL /f 2>nul || true && ` +
-                        `netsh winhttp reset proxy 2>nul || true && ` +
-                        `powershell -NoProfile -NonInteractive -Command "$s='[DllImport(\\\"wininet.dll\\\")]public static extern bool InternetSetOption(IntPtr h,int o,IntPtr b,int l);';Add-Type -MemberDefinition $s -Name W -Namespace N;$null=[N.W]::InternetSetOption(0,39,0,0);$null=[N.W]::InternetSetOption(0,37,0,0);" 2>nul || true`;
+            const cmd = [
+                `reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings" /v ProxyEnable /t REG_DWORD /d 0 /f`,
+                `reg delete "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings" /v ProxyServer /f`,
+                `reg delete "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings" /v AutoConfigURL /f`,
+                `netsh winhttp reset proxy`,
+                `powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command "$s='[DllImport(\\\"wininet.dll\\\")]public static extern bool InternetSetOption(IntPtr h,int o,IntPtr b,int l);';Add-Type -MemberDefinition $s -Name W -Namespace N;$null=[N.W]::InternetSetOption(0,39,0,0);$null=[N.W]::InternetSetOption(0,37,0,0);"`
+            ].map(c => `${c} >nul 2>&1`).join(' & ');
+
             if (isSync) {
-                try { execSync(cmd, { stdio: 'ignore' }); } catch (e) {}
+                try { execSync(cmd, { windowsHide: true, stdio: 'ignore' }); } catch (e) {}
             } else {
-                exec(cmd, (err) => {
+                exec(cmd, { windowsHide: true }, (err) => {
                     if (err) appendLog(`Windows Proxy hatası: ${err.message}`);
                     else appendLog(`Windows Sistem Proxy devre dışı bırakıldı.`);
                 });
             }
         }
-    } else if (process.platform === 'darwin') {
+    } else if (isMac) {
         if (enable) {
-            const cmd = `services=$(networksetup -listallnetworkservices 2>/dev/null | grep -v '\\*' | grep -v '^$'); while IFS= read -r s; do [ -n "$s" ] || continue; networksetup -setwebproxy "$s" 127.0.0.1 ${p} 2>/dev/null || true; networksetup -setsecurewebproxy "$s" 127.0.0.1 ${p} 2>/dev/null || true; networksetup -setsocksfirewallproxy "$s" 127.0.0.1 ${p} 2>/dev/null || true; networksetup -setproxybypassdomains "$s" localhost 127.0.0.1 "*.local" 2>/dev/null || true; done <<< "$services"`;
+            // macOS: Mixed inbound supports both SOCKS5 and HTTP.
+            // On macOS, enabling both SOCKS and WebProxy on the same port causes CFNetwork loop/deadlock.
+            // Using SOCKS5 proxy (setsocksfirewallproxy) cleanly routes all system TCP traffic.
+            const cmd = `services=$(networksetup -listallnetworkservices 2>/dev/null | grep -v '\\*' | grep -v '^$'); while IFS= read -r s; do [ -n "$s" ] || continue; networksetup -setsocksfirewallproxy "$s" 127.0.0.1 ${p} 2>/dev/null || true; networksetup -setwebproxystate "$s" off 2>/dev/null || true; networksetup -setsecurewebproxystate "$s" off 2>/dev/null || true; networksetup -setproxybypassdomains "$s" localhost 127.0.0.1 "*.local" 2>/dev/null || true; done <<< "$services"`;
             if (isSync) {
                 try { execSync(cmd, { shell: '/bin/bash', stdio: 'ignore' }); } catch (e) {}
             } else {
@@ -837,7 +924,7 @@ function setSystemProxy(enable, port, isSync = false) {
                 });
             }
         } else {
-            const cmd = `services=$(networksetup -listallnetworkservices 2>/dev/null | grep -v '\\*' | grep -v '^$'); while IFS= read -r s; do [ -n "$s" ] || continue; networksetup -setwebproxystate "$s" off 2>/dev/null || true; networksetup -setsecurewebproxystate "$s" off 2>/dev/null || true; networksetup -setsocksfirewallproxystate "$s" off 2>/dev/null || true; networksetup -setautoproxystate "$s" off 2>/dev/null || true; done <<< "$services"`;
+            const cmd = `services=$(networksetup -listallnetworkservices 2>/dev/null | grep -v '\\*' | grep -v '^$'); while IFS= read -r s; do [ -n "$s" ] || continue; networksetup -setsocksfirewallproxystate "$s" off 2>/dev/null || true; networksetup -setwebproxystate "$s" off 2>/dev/null || true; networksetup -setsecurewebproxystate "$s" off 2>/dev/null || true; networksetup -setautoproxystate "$s" off 2>/dev/null || true; done <<< "$services"`;
             if (isSync) {
                 try { execSync(cmd, { shell: '/bin/bash', stdio: 'ignore' }); } catch (e) {}
             } else {
@@ -866,9 +953,7 @@ function setSystemProxy(enable, port, isSync = false) {
 async function startVpn(nodeId) {
     if (isConnected) await stopVpn();
 
-    try {
-        require('child_process').execSync('pkill -f "sing-box run" 2>/dev/null || true');
-    } catch (e) {}
+    killSingBoxProcesses();
 
     const nodes = getNodes();
     const settings = getSettings();
@@ -897,7 +982,8 @@ async function startVpn(nodeId) {
                 throw new Error(`sing-box çekirdeği bulunamadı: ${BIN_PATH}`);
             }
             singboxProcess = spawn(BIN_PATH, ['run', '-c', RUNTIME_CONFIG_PATH], {
-                cwd: DATA_DIR
+                cwd: DATA_DIR,
+                windowsHide: true
             });
         } catch (spawnErr) {
             appendLog(`[HATA] Çekirdek başlatılamadı: ${spawnErr.message}`);
@@ -1428,11 +1514,7 @@ async function runNetworkDoctor() {
     isConnected = false;
     connectStartTime = null;
 
-    if (process.platform === 'linux') {
-        try { execSync('pkill -9 sing-box 2>/dev/null || true'); } catch (e) {}
-    } else if (process.platform === 'win32') {
-        try { execSync('taskkill /F /IM sing-box.exe 2>nul || true'); } catch (e) {}
-    }
+    killSingBoxProcesses();
 
     const settings = getSettings();
     const port = settings.mixedPort || 2080;
@@ -1575,10 +1657,10 @@ function checkGitHubUpdates() {
                     if (Array.isArray(release.assets)) {
                         if (isWin) {
                             matchedAsset = release.assets.find(a => a.name.endsWith('Setup.exe') || a.name.endsWith('.exe'));
-                        } else if (process.platform === 'darwin') {
+                        } else if (isMac) {
                             matchedAsset = release.assets.find(a => a.name.endsWith('.dmg'));
                         } else {
-                            matchedAsset = release.assets.find(a => a.name.endsWith('.AppImage'));
+                            matchedAsset = release.assets.find(a => a.name.endsWith('.AppImage')) || release.assets.find(a => a.name.endsWith('.deb'));
                         }
                     }
 
@@ -1713,9 +1795,13 @@ async function performInstallAndRestart() {
 
     setTimeout(() => {
         if (isWin) {
-            spawn(file, ['/S'], { detached: true, stdio: 'ignore' }).unref();
+            try {
+                spawn(file, [], { detached: true, stdio: 'ignore', windowsHide: false }).unref();
+            } catch (e) {
+                try { exec(`start "" "${file}"`); } catch (_) {}
+            }
             process.exit(0);
-        } else if (process.platform === 'darwin') {
+        } else if (isMac) {
             exec(`open "${file}"`);
             process.exit(0);
         } else {
@@ -2046,6 +2132,16 @@ const server = http.createServer(async (req, res) => {
             }
 
             if (pathname === '/api/tun/enable' && req.method === 'POST') {
+                if (isWin || isMac) {
+                    const settings = getSettings();
+                    settings.tunMode = true;
+                    saveSettings(settings);
+                    appendLog(`✅ ${isWin ? 'Windows' : 'macOS'} TUN modu aktif edildi.`);
+                    if (isConnected) {
+                        try { await startVpn(activeNodeId); } catch (e) {}
+                    }
+                    return sendJson(200, { success: true, capable: true, tunMode: true });
+                }
                 try {
                     appendLog("TUN modu için yönetici yetkisi isteniyor (Polkit)...");
                     exec(`pkexec setcap cap_net_admin,cap_net_bind_service+ep "${BIN_PATH}"`, async (err, stdout, stderr) => {

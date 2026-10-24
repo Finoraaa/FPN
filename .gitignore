@@ -12,6 +12,7 @@ build/
 *.exe
 *.dmg
 *.zip
+bin/sing-box-*
 
 # Runtime temporary data & logs
 client/data/runtime_config.json

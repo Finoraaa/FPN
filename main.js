@@ -41,14 +41,16 @@ function showDesktopNotification(title, body) {
                 body: body,
                 icon: iconPath
             }).show();
-        } else {
+        } else if (process.platform === 'linux') {
             exec(`notify-send -i "${iconPath}" "${title.replace(/"/g, '\\"')}" "${body.replace(/"/g, '\\"')}" 2>/dev/null || true`);
         }
     } catch (e) {
-        try {
-            const iconPath = path.join(__dirname, 'client', 'public', 'img', 'icon.png');
-            exec(`notify-send -i "${iconPath}" "${title.replace(/"/g, '\\"')}" "${body.replace(/"/g, '\\"')}" 2>/dev/null || true`);
-        } catch (ex) {}
+        if (process.platform === 'linux') {
+            try {
+                const iconPath = path.join(__dirname, 'client', 'public', 'img', 'icon.png');
+                exec(`notify-send -i "${iconPath}" "${title.replace(/"/g, '\\"')}" "${body.replace(/"/g, '\\"')}" 2>/dev/null || true`);
+            } catch (ex) {}
+        }
     }
 }
 
