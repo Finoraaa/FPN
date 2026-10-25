@@ -8,7 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 
-const String currentAppVersion = '1.1.1';
+const String currentAppVersion = '1.1.2';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -50,6 +50,16 @@ class FpnNode {
         ping: json['ping'] as int?,
       );
 }
+
+class FatchItem {
+  final String icon;
+  final String title;
+  final String desc;
+
+  const FatchItem(this.icon, this.title, this.desc);
+}
+
+typedef FaarchItem = FatchItem;
 
 class FpnApp extends StatelessWidget {
   const FpnApp({super.key});
@@ -619,28 +629,57 @@ class _FpnHomePageState extends State<FpnHomePage>
             ],
           ),
           const SizedBox(height: 10),
-          SizedBox(
-            width: double.infinity,
-            height: 38,
-            child: ElevatedButton.icon(
-              onPressed: _startOtaUpdate,
-              icon: const Icon(Icons.bolt, size: 16, color: Colors.black),
-              label: const Text(
-                "Tek Tıkla İndir & Güncelle",
-                style: TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 12,
+          Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: 38,
+                  child: ElevatedButton.icon(
+                    onPressed: _startOtaUpdate,
+                    icon: const Icon(Icons.bolt, size: 16, color: Colors.black),
+                    label: const Text(
+                      "İndir & Güncelle",
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 12,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF10B981),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
                 ),
               ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF10B981),
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+              const SizedBox(width: 8),
+              SizedBox(
+                height: 38,
+                child: OutlinedButton.icon(
+                  onPressed: _showFatchNotesModal,
+                  icon: const Icon(Icons.auto_awesome_rounded,
+                      size: 14, color: Color(0xFF34D399)),
+                  label: const Text(
+                    "Fatch Notes",
+                    style: TextStyle(
+                      color: Color(0xFF34D399),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 11,
+                    ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(
+                        color: const Color(0xFF10B981).withOpacity(0.4)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
                 ),
               ),
-            ),
+            ],
           ),
         ],
       ),
@@ -1424,190 +1463,727 @@ class _FpnHomePageState extends State<FpnHomePage>
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setModalState) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 18),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Row(
+            return SafeArea(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.85,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Sürüklenebilir Üst Çubuk Göstergesi
+                    const SizedBox(height: 12),
+                    Center(
+                      child: Container(
+                        width: 42,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.24),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Başlık Alanı
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 18),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Icon(Icons.tune_rounded, color: Color(0xFF38BDF8)),
-                          SizedBox(width: 8),
-                          Text(
-                            "FPN Gelişmiş Ayarlar",
-                            style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
+                          const Row(
+                            children: [
+                              Icon(Icons.tune_rounded,
+                                  color: Color(0xFF38BDF8), size: 22),
+                              SizedBox(width: 10),
+                              Text(
+                                "FPN Gelişmiş Ayarlar",
+                                style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white),
+                              ),
+                            ],
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close_rounded,
+                                color: Colors.white60),
+                            onPressed: () => Navigator.pop(context),
                           ),
                         ],
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
+                    ),
+                    const SizedBox(height: 8),
 
-                  // 1. Bölünmüş Tünel (Bypass Türkiye)
-                  SwitchListTile(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    tileColor: Colors.white.withOpacity(0.03),
-                    title: const Text(
-                      "Bölünmüş Tünel (Split Tunneling)",
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                    ),
-                    subtitle: const Text(
-                      "Türk Bankaları, e-Devlet ve yerel alışveriş uygulamalarını VPN'den muaf tutar; tam hızda çalıştırır.",
-                      style: TextStyle(fontSize: 12, color: Colors.white60),
-                    ),
-                    value: bypassTurkeyApps,
-                    activeColor: const Color(0xFF10B981),
-                    onChanged: (val) {
-                      setModalState(() => bypassTurkeyApps = val);
-                      setState(() => bypassTurkeyApps = val);
-                      _savePreferences();
-                    },
-                  ),
-
-                  const SizedBox(height: 10),
-
-                  // 2. Kill Switch
-                  SwitchListTile(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    tileColor: Colors.white.withOpacity(0.03),
-                    title: const Text(
-                      "Kill Switch (Sızıntı Koruması)",
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                    ),
-                    subtitle: const Text(
-                      "VPN bağlantısı beklenmedik şekilde kesilirse veri sızıntılarını önlemek için uyarı verir.",
-                      style: TextStyle(fontSize: 12, color: Colors.white60),
-                    ),
-                    value: killSwitchEnabled,
-                    activeColor: const Color(0xFFF43F5E),
-                    onChanged: (val) {
-                      setModalState(() => killSwitchEnabled = val);
-                      setState(() => killSwitchEnabled = val);
-                      _savePreferences();
-                    },
-                  ),
-
-                  const SizedBox(height: 10),
-
-                  // 3. Otomatik En Hızlı Sunucu
-                  SwitchListTile(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    tileColor: Colors.white.withOpacity(0.03),
-                    title: const Text(
-                      "Her Bağlantıda En Hızlı Sunucuyu Seç",
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                    ),
-                    subtitle: const Text(
-                      "Bağlan'a bastığınızda en düşük pingli düğümü otomatik tespit edip bağlanır.",
-                      style: TextStyle(fontSize: 12, color: Colors.white60),
-                    ),
-                    value: autoConnectFastest,
-                    activeColor: const Color(0xFF38BDF8),
-                    onChanged: (val) {
-                      setModalState(() => autoConnectFastest = val);
-                      setState(() => autoConnectFastest = val);
-                      _savePreferences();
-                    },
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // Abonelik Linkleri Butonu
-                  OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 14, horizontal: 16),
-                      side: BorderSide(color: Colors.white.withOpacity(0.15)),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14)),
-                    ),
-                    onPressed: () {
-                      Navigator.pop(context);
-                      _showSubscriptionDialog();
-                    },
-                    icon: const Icon(Icons.rss_feed_rounded,
-                        color: Color(0xFF38BDF8)),
-                    label: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          "Abonelik (Subscription) Yönetimi",
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        Text(
-                          "${subscriptionUrls.length} Aktif Sub",
-                          style: const TextStyle(
-                              color: Color(0xFF38BDF8), fontSize: 12),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 10),
-
-                  // Sıfırlama Butonu
-                  TextButton.icon(
-                    onPressed: () async {
-                      final confirm = await showDialog<bool>(
-                        context: context,
-                        builder: (ctx) => AlertDialog(
-                          backgroundColor: const Color(0xFF18181B),
-                          title: const Text("Ayarları Sıfırla"),
-                          content: const Text(
-                              "Tüm eklenen özel sunucular ve ayarlar varsayılana dönecektir. Devam edilsin mi?"),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(ctx, false),
-                              child: const Text("İptal"),
+                    // Kaydırılabilir Ayar Öğeleri
+                    Expanded(
+                      child: SingleChildScrollView(
+                        physics: const BouncingScrollPhysics(),
+                        padding: EdgeInsets.fromLTRB(
+                            18, 6, 18, MediaQuery.of(context).viewInsets.bottom + 24),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // 🌟 FATCH NOTES BUTONU (ÖNE ÇIKAN SÜRÜM NOTLARI KARTI)
+                            InkWell(
+                              onTap: () {
+                                Navigator.pop(context);
+                                _showFatchNotesModal();
+                              },
+                              borderRadius: BorderRadius.circular(16),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 14, vertical: 12),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF10B981).withOpacity(0.08),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: const Color(0xFF10B981).withOpacity(0.32),
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFF10B981).withOpacity(0.18),
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: const Icon(Icons.auto_awesome_rounded,
+                                          color: Color(0xFF34D399), size: 20),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    const Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            "Fatch Notes (Sürüm Günlüğü)",
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 14,
+                                                color: Colors.white),
+                                          ),
+                                          SizedBox(height: 2),
+                                          Text(
+                                            "v1.1.2 ve geçmiş tüm sürümlerin sade anlatımı",
+                                            style: TextStyle(
+                                                fontSize: 11, color: Colors.white60),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFF10B981).withOpacity(0.2),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: const Text(
+                                        "v1.1.2 YENİ",
+                                        style: TextStyle(
+                                            color: Color(0xFF34D399),
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 10),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    const Icon(Icons.chevron_right_rounded,
+                                        color: Colors.white38, size: 20),
+                                  ],
+                                ),
+                              ),
                             ),
-                            TextButton(
-                              onPressed: () => Navigator.pop(ctx, true),
-                              child: const Text("Sıfırla",
-                                  style: TextStyle(color: Colors.redAccent)),
+
+                            const SizedBox(height: 12),
+
+                            // 1. Bölünmüş Tünel (Split Tunneling)
+                            Container(
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF18181F),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: Colors.white.withOpacity(0.06)),
+                              ),
+                              child: SwitchListTile(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                secondary: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF10B981).withOpacity(0.12),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: const Icon(Icons.alt_route_rounded,
+                                      color: Color(0xFF10B981), size: 20),
+                                ),
+                                title: const Text(
+                                  "Bölünmüş Tünel (Split Tunneling)",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold, fontSize: 13.5),
+                                ),
+                                subtitle: const Text(
+                                  "Türk Bankaları, e-Devlet ve yerel uygulamaları VPN'den muaf tutar; tam hızda çalıştırır.",
+                                  style: TextStyle(fontSize: 11.5, color: Colors.white60),
+                                ),
+                                value: bypassTurkeyApps,
+                                activeColor: const Color(0xFF10B981),
+                                onChanged: (val) {
+                                  setModalState(() => bypassTurkeyApps = val);
+                                  setState(() => bypassTurkeyApps = val);
+                                  _savePreferences();
+                                },
+                              ),
                             ),
+
+                            const SizedBox(height: 10),
+
+                            // 2. Kill Switch (Sızıntı Koruması)
+                            Container(
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF18181F),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: Colors.white.withOpacity(0.06)),
+                              ),
+                              child: SwitchListTile(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                secondary: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFF43F5E).withOpacity(0.12),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: const Icon(Icons.security_rounded,
+                                      color: Color(0xFFF43F5E), size: 20),
+                                ),
+                                title: const Text(
+                                  "Kill Switch (Sızıntı Koruması)",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold, fontSize: 13.5),
+                                ),
+                                subtitle: const Text(
+                                  "VPN bağlantısı beklenmedik şekilde kesilirse veri sızıntılarını önlemek için uyarı verir.",
+                                  style: TextStyle(fontSize: 11.5, color: Colors.white60),
+                                ),
+                                value: killSwitchEnabled,
+                                activeColor: const Color(0xFFF43F5E),
+                                onChanged: (val) {
+                                  setModalState(() => killSwitchEnabled = val);
+                                  setState(() => killSwitchEnabled = val);
+                                  _savePreferences();
+                                },
+                              ),
+                            ),
+
+                            const SizedBox(height: 10),
+
+                            // 3. Her Bağlantıda En Hızlı Sunucu
+                            Container(
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF18181F),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: Colors.white.withOpacity(0.06)),
+                              ),
+                              child: SwitchListTile(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                secondary: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF38BDF8).withOpacity(0.12),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: const Icon(Icons.bolt_rounded,
+                                      color: Color(0xFF38BDF8), size: 20),
+                                ),
+                                title: const Text(
+                                  "Her Bağlantıda En Hızlı Sunucuyu Seç",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold, fontSize: 13.5),
+                                ),
+                                subtitle: const Text(
+                                  "Bağlan'a bastığınızda en düşük pingli düğümü otomatik tespit edip bağlanır.",
+                                  style: TextStyle(fontSize: 11.5, color: Colors.white60),
+                                ),
+                                value: autoConnectFastest,
+                                activeColor: const Color(0xFF38BDF8),
+                                onChanged: (val) {
+                                  setModalState(() => autoConnectFastest = val);
+                                  setState(() => autoConnectFastest = val);
+                                  _savePreferences();
+                                },
+                              ),
+                            ),
+
+                            const SizedBox(height: 14),
+
+                            // Abonelik Linkleri Butonu
+                            InkWell(
+                              onTap: () {
+                                Navigator.pop(context);
+                                _showSubscriptionDialog();
+                              },
+                              borderRadius: BorderRadius.circular(16),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 14, vertical: 13),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.04),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border:
+                                      Border.all(color: Colors.white.withOpacity(0.08)),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFF38BDF8).withOpacity(0.15),
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: const Icon(Icons.rss_feed_rounded,
+                                          color: Color(0xFF38BDF8), size: 20),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    const Expanded(
+                                      child: Text(
+                                        "Abonelik (Subscription) Yönetimi",
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 13.5),
+                                      ),
+                                    ),
+                                    Text(
+                                      "${subscriptionUrls.length} Aktif Sub",
+                                      style: const TextStyle(
+                                          color: Color(0xFF38BDF8),
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    const Icon(Icons.chevron_right_rounded,
+                                        color: Colors.white38, size: 20),
+                                  ],
+                                ),
+                              ),
+                            ),
+
+                            const SizedBox(height: 12),
+
+                            // Sıfırlama Butonu
+                            Center(
+                              child: TextButton.icon(
+                                style: TextButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 8),
+                                ),
+                                onPressed: () async {
+                                  final confirm = await showDialog<bool>(
+                                    context: context,
+                                    builder: (ctx) => AlertDialog(
+                                      backgroundColor: const Color(0xFF18181B),
+                                      title: const Text("Ayarları Sıfırla"),
+                                      content: const Text(
+                                          "Tüm eklenen özel sunucular ve ayarlar varsayılana dönecektir. Devam edilsin mi?"),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () => Navigator.pop(ctx, false),
+                                          child: const Text("İptal"),
+                                        ),
+                                        TextButton(
+                                          onPressed: () => Navigator.pop(ctx, true),
+                                          child: const Text("Sıfırla",
+                                              style: TextStyle(color: Colors.redAccent)),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+
+                                  if (confirm == true && mounted) {
+                                    setState(() {
+                                      nodes = List.from(defaultNodes);
+                                      selectedNode = nodes[0];
+                                      subscriptionUrls.clear();
+                                    });
+                                    await _savePreferences();
+                                    if (mounted) Navigator.pop(context);
+                                    _showToast("Tüm sunucular varsayılana sıfırlandı.");
+                                  }
+                                },
+                                icon: const Icon(Icons.refresh_rounded,
+                                    size: 16, color: Colors.white54),
+                                label: const Text(
+                                  "Varsayılan Sunucuları Geri Yükle",
+                                  style: TextStyle(color: Colors.white54, fontSize: 12),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 6),
                           ],
                         ),
-                      );
-
-                      if (confirm == true && mounted) {
-                        setState(() {
-                          nodes = List.from(defaultNodes);
-                          selectedNode = nodes[0];
-                          subscriptionUrls.clear();
-                        });
-                        await _savePreferences();
-                        if (mounted) Navigator.pop(context);
-                        _showToast("Tüm sunucular varsayılana sıfırlandı.");
-                      }
-                    },
-                    icon: const Icon(Icons.refresh_rounded,
-                        size: 16, color: Colors.white54),
-                    label: const Text(
-                      "Varsayılan Sunucuları Geri Yükle",
-                      style: TextStyle(color: Colors.white54, fontSize: 12),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             );
           },
         );
       },
+    );
+  }
+
+  // --- Fatch Notes (Sürüm Günlüğü) Modalı ---
+  void _showFatchNotesModal() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF121217),
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.88,
+            ),
+            child: Column(
+              children: [
+                const SizedBox(height: 12),
+                Center(
+                  child: Container(
+                    width: 42,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.24),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // Başlık
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF10B981).withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(Icons.auto_awesome_rounded,
+                                color: Color(0xFF34D399), size: 20),
+                          ),
+                          const SizedBox(width: 10),
+                          const Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "FPN Fatch Notes",
+                                style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white),
+                              ),
+                              Text(
+                                "Tüm güncellemeler normal kullanıcı anlatımıyla",
+                                style: TextStyle(
+                                    fontSize: 11, color: Colors.white54),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close_rounded,
+                            color: Colors.white60),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+
+                // Sürüm Rozeti
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 20),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.04),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.white.withOpacity(0.08)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.check_circle_rounded,
+                          color: Color(0xFF10B981), size: 16),
+                      const SizedBox(width: 8),
+                      Text(
+                        "Kullandığınız Sürüm: v$currentAppVersion (En Güncel)",
+                        style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF34D399)),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // Kaydırılabilir Sürüm Kartları
+                Expanded(
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.fromLTRB(20, 4, 20, 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildMobileFatchCard(
+                          version: "v1.1.2",
+                          date: "25 Ekim 2026",
+                          title: "Telefon APK İndirme & QR, Fatch Notes & Ayarlar GUI",
+                          isLatest: true,
+                          items: const [
+                            FatchItem("📱", "Telefon İçin İndir & Dinamik APK QR Kodu",
+                                "Bilgisayar ekranındaki QR kodu kamerayla okutarak Android APK'sını doğrudan telefona indirme desteği."),
+                            FatchItem("📖", "Fatch Notes Sistemi",
+                                "Tüm yeniliklerin teknik jargondan uzak, herkesin rahatça anlayabileceği sade bir dille anlatıldığı sürüm günlüğü."),
+                            FatchItem("🎨", "Yenilenen Mobil Ayarlar GUI",
+                                "Ayarlar menüsü daha ferah, kaydırılabilir ve ekran taşmalarını engelleyen modern kart tasarımıyla baştan sona yenilendi."),
+                            FatchItem("⚡", "Hız ve Kararlılık İyileştirmeleri",
+                                "Tüm sistemlerde sessiz bağlantı, düşük gecikme ve kesintisiz internet erişimi."),
+                          ],
+                        ),
+                        const SizedBox(height: 14),
+                        _buildMobileFatchCard(
+                          version: "v1.1.0",
+                          date: "25 Ekim 2026",
+                          title: "Büyük Kararlılık, Çoklu Platform & Sistem VPN Modu",
+                          isLatest: false,
+                          items: const [
+                            FatchItem("🪟", "Windows Sessiz & Hatasız Bağlantı",
+                                "Arka planda siyah pencere açılmadan tek tıkla sessiz tünelleme."),
+                            FatchItem("🍏", "Apple Mac & iPhone Kararlılığı",
+                                "Bağlantı kopmaları ve uyumsuzluklar giderildi, tam sistem uyumu sağlandı."),
+                            FatchItem("🐧", "Linux Tam Bilgisayar Koruması",
+                                "Tüm bilgisayarın trafiğini kapsayan tam koruma modu (TUN)."),
+                            FatchItem("⚡", "Daha Hızlı Sunucular & Düşük Ping",
+                                "Cloudflare CDN omurgası güçlendirildi, 4K video ve sosyal medya hızlandırıldı."),
+                          ],
+                        ),
+                        const SizedBox(height: 14),
+                        _buildMobileFatchCard(
+                          version: "v1.0.9",
+                          date: "20 Ekim 2026",
+                          title: "Dahili Hız Testi & Akıllı Sunucu Dağıtımı",
+                          isLatest: false,
+                          items: const [
+                            FatchItem("🚀", "Dahili Hız Testi",
+                                "Mobil bağlantı hızını ve ping gecikmesini tek tıkla ölçebilme."),
+                            FatchItem("🌐", "Akıllı En Hızlı Sunucu Dağıtımı",
+                                "En düşük pingli sunucuya otomatik geçiş."),
+                            FatchItem("💬", "Geri Bildirim & Topluluk",
+                                "Telegram ve Instagram üzerinden geliştiriciye anında mesaj."),
+                          ],
+                        ),
+                        const SizedBox(height: 14),
+                        _buildMobileFatchCard(
+                          version: "v1.0.8",
+                          date: "15 Ekim 2026",
+                          title: "Siber Karanlık Arayüz & Güçlü Şifreleme",
+                          isLatest: false,
+                          items: const [
+                            FatchItem("🎨", "Modern Siber Arayüz",
+                                "Şık zümrüt yeşili neon karanlık tema ve canlı sayaçlar."),
+                            FatchItem("🔒", "VLESS & TLS 1.3 Gizlilik",
+                                "Tespit edilemeyen ve sansürlenemeyen kırılmaz şifreleme."),
+                          ],
+                        ),
+                        const SizedBox(height: 14),
+                        _buildMobileFatchCard(
+                          version: "v1.0.7",
+                          date: "10 Ekim 2026",
+                          title: "Temiz IP (Clean IP) & Sızıntı Koruması",
+                          isLatest: false,
+                          items: const [
+                            FatchItem("🛡️", "Temiz IP (Clean IP) Altyapısı",
+                                "Türkiye'de engelsiz Cloudflare Anycast IP entegrasyonu."),
+                            FatchItem("🔍", "DNS Sızıntı Koruması",
+                                "IP ve DNS sorgularının sızmasını önleyen güvenlik zırhı."),
+                          ],
+                        ),
+                        const SizedBox(height: 14),
+                        _buildMobileFatchCard(
+                          version: "v1.0.5",
+                          date: "1 Ekim 2026",
+                          title: "Otomatik Güncelleyici (OTA) & Canlı Ağ Takibi",
+                          isLatest: false,
+                          items: const [
+                            FatchItem("🔄", "Otomatik Güncelleme Motoru",
+                                "Yeni sürümleri uygulama içerisinden kolayca güncelleme."),
+                            FatchItem("⏱️", "Canlı Ping ve Süre Sayacı",
+                                "Bağlantı gecikmesini anlık takip etme."),
+                          ],
+                        ),
+                        const SizedBox(height: 14),
+                        _buildMobileFatchCard(
+                          version: "v1.0.0",
+                          date: "15 Eylül 2026",
+                          title: "FPN Freedom Private Network İlk Resmi Yayını",
+                          isLatest: false,
+                          items: const [
+                            FatchItem("🚀", "Özgür İnternet Hareketi",
+                                "Herkes için tamamen ücretsiz, açık kaynaklı ve sansürsüz internet."),
+                            FatchItem("🌍", "Sınırsız ve Kotasız Erişim",
+                                "Hız limiti olmadan tüm engelli platformlara güvenli erişim."),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildMobileFatchCard({
+    required String version,
+    required String date,
+    required String title,
+    required bool isLatest,
+    required List<FatchItem> items,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFF18181F),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isLatest
+              ? const Color(0xFF10B981).withOpacity(0.4)
+              : Colors.white.withOpacity(0.08),
+        ),
+        boxShadow: isLatest
+            ? [
+                BoxShadow(
+                  color: const Color(0xFF10B981).withOpacity(0.1),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
+                )
+              ]
+            : null,
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  if (isLatest) ...[
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF10B981),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                  ],
+                  Text(
+                    version,
+                    style: TextStyle(
+                      fontFamily: 'monospace',
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                      color: isLatest ? const Color(0xFF34D399) : Colors.white,
+                    ),
+                  ),
+                  if (isLatest) ...[
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF10B981).withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: const Text(
+                        "EN GÜNCEL",
+                        style: TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF34D399)),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+              Text(
+                date,
+                style: const TextStyle(fontSize: 11, color: Colors.white38),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            title,
+            style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                color: Colors.white70),
+          ),
+          const SizedBox(height: 12),
+          ...items.map((item) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(item.icon, style: const TextStyle(fontSize: 14)),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: RichText(
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: "${item.title}: ",
+                              style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white),
+                            ),
+                            TextSpan(
+                              text: item.desc,
+                              style: const TextStyle(
+                                  fontSize: 11, color: Colors.white60),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              )),
+        ],
+      ),
     );
   }
 
@@ -1991,6 +2567,22 @@ class _FpnHomePageState extends State<FpnHomePage>
                   ),
                   Row(
                     children: [
+                      // Fatch Notes Butonu
+                      IconButton(
+                        tooltip: "Fatch Notes",
+                        icon: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF121217),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                                color: const Color(0xFF10B981).withOpacity(0.35)),
+                          ),
+                          child: const Icon(Icons.auto_awesome_rounded,
+                              size: 18, color: Color(0xFF34D399)),
+                        ),
+                        onPressed: _showFatchNotesModal,
+                      ),
                       // Ayarlar Butonu
                       IconButton(
                         tooltip: "Gelişmiş Ayarlar",

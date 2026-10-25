@@ -48,9 +48,9 @@
                     <span class="icon">📱</span>
                     <span class="label">Telefon İçin İndir</span>
                 </button>
-                <button class="nav-btn" id="tabBtnPatchNotes" onclick="switchTab('patchnotes')">
+                <button class="nav-btn" id="tabBtnFatchnotes" onclick="switchTab('fatchnotes')">
                     <span class="icon">✨</span>
-                    <span class="label">Yama Notları</span>
+                    <span class="label">Fatch Notes</span>
                 </button>
                 <button class="nav-btn" id="tabBtnDonate" onclick="switchTab('donate')">
                     <span class="icon">💖</span>
@@ -78,7 +78,7 @@
                         <strong class="status-state" id="sidebarStatusText">Bağlı Değil</strong>
                     </div>
                 </div>
-                <div class="version-tag" onclick="switchTab('patchnotes')" style="cursor: pointer;" title="Yama notlarını görüntüle">FPN v1.1.1 • sing-box Core</div>
+                <div class="version-tag" onclick="switchTab('fatchnotes')" style="cursor: pointer;" title="Fatch Notes görüntüle">FPN v1.1.2 • sing-box Core</div>
             </div>
         </aside>
 
@@ -100,9 +100,9 @@
                         </div>
                         <span class="update-progress-label" id="updateProgressLabel">İndiriliyor: %0</span>
                     </div>
-                    <button class="btn-update-patchnotes" id="btnUpdatePatchNotes" onclick="openPatchNotesModal()">
+                    <button class="btn-update-patchnotes" id="btnUpdatePatchNotes" onclick="openFatchNotesModal()">
                         <span class="cta-icon">📖</span>
-                        <span class="cta-text">Yama Notları</span>
+                        <span class="cta-text">Fatch Notes</span>
                     </button>
                     <button class="btn-update-cta" id="btnUpdateCta" onclick="triggerUpdateFlow()">
                         <span class="cta-icon">⚡</span>
@@ -295,7 +295,7 @@
                     <div class="qr-presentation-card apk-download-card">
                         <div class="card-badge-row">
                             <span class="card-badge apk-badge">🤖 RESMİ ANDROID SÜRÜMÜ</span>
-                            <span class="apk-version-chip" id="apkVersionChip">v1.1.1</span>
+                            <span class="apk-version-chip" id="apkVersionChip">v1.1.2</span>
                         </div>
                         <h3>Telefonunuz İçin İndirin</h3>
                         <p class="subtitle">Telefonunuzun kamerasını aşağıdaki QR koda tutun; en güncel <b>FPN Android APK</b> dosyası doğrudan telefonunuza insin.</p>
@@ -731,32 +731,35 @@
                         </div>
                     </div>
                     <pre class="terminal-body" id="terminalOutput">FPN konsolu hazır...</pre>
-            <!-- TAB 6: PATCH NOTES / YAMA NOTLARI -->
-            <section class="tab-panel" id="panelPatchNotes">
+                </div>
+            </section>
+
+            <!-- TAB 6: FATCH NOTES / SÜRÜM GÜNLÜĞÜ -->
+            <section class="tab-panel" id="panelFatchnotes">
                 <div class="patchnotes-container">
                     <div class="patchnotes-header-card">
                         <div class="header-content">
-                            <span class="card-badge patch-badge">✨ SÜRÜM GÜNLÜĞÜ</span>
-                            <h2>FPN Yama Notları (Patch Notes)</h2>
-                            <p class="subtitle">Her güncellemede yapılan iyileştirmeleri, yeni özellikleri ve çözülen hataları herkesin rahatça anlayabileceği sade bir dille buradan takip edebilirsiniz.</p>
+                            <span class="card-badge patch-badge">✨ FATCH NOTES</span>
+                            <h2>FPN Fatch Notes (Sürüm Günlüğü)</h2>
+                            <p class="subtitle">Her güncellemede yapılan iyileştirmeleri, yeni özellikleri ve eskiye dair tüm sürüm notlarını sade bir dille buradan takip edebilirsiniz.</p>
                         </div>
                         <div class="current-ver-chip">
                             <span class="chip-label">KULLANDIĞINIZ SÜRÜM</span>
-                            <strong class="chip-val">v1.1.1 (En Güncel)</strong>
+                            <strong class="chip-val">v1.1.2 (En Güncel)</strong>
                         </div>
                     </div>
 
                     <div class="patchnotes-timeline">
-                        <!-- SÜRÜM 1.1.1 -->
+                        <!-- SÜRÜM 1.1.2 -->
                         <div class="patch-card latest">
                             <div class="patch-card-header">
                                 <div class="patch-title-wrap">
                                     <div class="patch-version-tag">
                                         <span class="pulse-dot-emerald"></span>
-                                        <strong>v1.1.1</strong>
+                                        <strong>v1.1.2</strong>
                                         <span class="badge-latest">EN GÜNCEL SÜRÜM</span>
                                     </div>
-                                    <h3 class="patch-title">Telefon İçin İndir (APK QR Kodu) & Yama Notları</h3>
+                                    <h3 class="patch-title">Telefon İçin İndir (Dinamik APK QR Kodu), Fatch Notes & Yenilenen Mobil Ayarlar GUI</h3>
                                 </div>
                                 <span class="patch-date">📅 25 Ekim 2026</span>
                             </div>
@@ -774,8 +777,16 @@
                                     <div class="patch-highlight-item">
                                         <div class="item-icon">📖</div>
                                         <div class="item-content">
-                                            <strong>Kullanıcı Dostu Yama Notları (Patch Notes)</strong>
-                                            <p>Her güncellemede yapılan yeniliklerin ve düzeltmelerin teknik karmaşadan uzak, herkesin kolayca anlayabileceği sade bir dille anlatıldığı Yama Notları sayfası ve güncelleme önizleme penceresi eklendi.</p>
+                                            <strong>Kullanıcı Dostu Fatch Notes Sistemi</strong>
+                                            <p>Her güncellemede yapılan yeniliklerin ve düzeltmelerin teknik karmaşadan uzak, herkesin kolayca anlayabileceği sade bir dille anlatıldığı Fatch Notes sayfası ve güncelleme önizleme penceresi eklendi.</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="patch-highlight-item">
+                                        <div class="item-icon">🎨</div>
+                                        <div class="item-content">
+                                            <strong>Yenilenen Mobil Ayarlar Arayüzü</strong>
+                                            <p>Telefon uygulamasında ayarlar ekranı baştan tasarlandı; kaydırılabilir akıcı yapı, modern sürükleme tutamacı ve ekran taşmalarını önleyen korumalı yerleşim getirildi.</p>
                                         </div>
                                     </div>
 
@@ -805,14 +816,6 @@
                             <div class="patch-card-body">
                                 <div class="patch-highlight-grid">
                                     <div class="patch-highlight-item">
-                                        <div class="item-icon">📱</div>
-                                        <div class="item-content">
-                                            <strong>Telefon İçin Kolay İndirme (Android APK & QR Kod)</strong>
-                                            <p>Telefonunuza FPN yüklemek artık tek adım! <em>"Telefon İçin İndir"</em> sekmesindeki QR kodu telefonunuzun kamerasına tutarak en son Android APK dosyasını saniyeler içinde doğrudan telefonunuza indirebilirsiniz. Ekstra karmaşık ayar yapmanıza gerek kalmadı.</p>
-                                        </div>
-                                    </div>
-
-                                    <div class="patch-highlight-item">
                                         <div class="item-icon">🪟</div>
                                         <div class="item-content">
                                             <strong>Windows İçin Sessiz & Hatasız Bağlantı</strong>
@@ -841,14 +844,6 @@
                                         <div class="item-content">
                                             <strong>Daha Hızlı Sunucular ve Düşük Gecikme (Ping)</strong>
                                             <p>Sunucu bağlantı omurgası hızlandırıldı. İnternet hızınızda kayıp yaşamadan YouTube'da 4K video izleyebilir, Instagram ve engelli tüm sitelerde gecikmesiz gezinebilirsiniz.</p>
-                                        </div>
-                                    </div>
-
-                                    <div class="patch-highlight-item">
-                                        <div class="item-icon">🔄</div>
-                                        <div class="item-content">
-                                            <strong>Akıllı ve Otomatik Güncelleme Sistemi</strong>
-                                            <p>Uygulama içi güncelleme sistemi yenilendi. Yeni bir sürüm çıktığında sisteminiz için en uygun kurulum dosyası otomatik olarak bulunur, tek tıkla indirilir ve güncellenir.</p>
                                         </div>
                                     </div>
                                 </div>
@@ -889,7 +884,7 @@
                                         <div class="item-icon">💬</div>
                                         <div class="item-content">
                                             <strong>Geri Bildirim & İstek Bildirimi</strong>
-                                            <p>Fikirlerinizi, hata bildirimlerinizi ve önerilerinizi geliştiriciye anında iletebilmeniz için dahili Geri Bildirim formu eklendi.</p>
+                                            <p>Fikirlerinizi, hata bildirimlerinizi ve önerilerinizi geliştiriciye anında iletebilmeniz için dahili Geri Bildirim formu (Telegram & Instagram) eklendi.</p>
                                         </div>
                                     </div>
                                 </div>
@@ -923,6 +918,113 @@
                                         <div class="item-content">
                                             <strong>Kırılmaz Gizlilik & Şifreleme</strong>
                                             <p>VLESS ve TLS 1.3 güvenlik protokolleri devreye alınarak internet servis sağlayıcılarının ve sansür sistemlerinin bağlantıyı tespit etmesi imkansız hale getirildi.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SÜRÜM 1.0.7 -->
+                        <div class="patch-card">
+                            <div class="patch-card-header">
+                                <div class="patch-title-wrap">
+                                    <div class="patch-version-tag">
+                                        <strong>v1.0.7</strong>
+                                    </div>
+                                    <h3 class="patch-title">Temiz IP (Clean IP) Tarayıcısı & Sızıntı Koruması</h3>
+                                </div>
+                                <span class="patch-date">📅 10 Ekim 2026</span>
+                            </div>
+
+                            <div class="patch-card-body">
+                                <div class="patch-highlight-grid">
+                                    <div class="patch-highlight-item">
+                                        <div class="item-icon">🛡️</div>
+                                        <div class="item-content">
+                                            <strong>Otomatik Temiz IP (Clean IP) Bulucu</strong>
+                                            <p>Türkiye'de engellenmeyen ve en düşük gecikmeye sahip Cloudflare Anycast IP adreslerini tek tıkla tarayıp sunucunuza uygulayan akıllı araç eklendi.</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="patch-highlight-item">
+                                        <div class="item-icon">🔍</div>
+                                        <div class="item-content">
+                                            <strong>DNS & IP Sızıntı Teşhisi</strong>
+                                            <p>Gerçek IP adresinizin veya DNS sorgularınızın yerel sağlayıcınıza sızıp sızmadığını test eden dahili güvenlik kontrol ekranı eklendi.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SÜRÜM 1.0.5 -->
+                        <div class="patch-card">
+                            <div class="patch-card-header">
+                                <div class="patch-title-wrap">
+                                    <div class="patch-version-tag">
+                                        <strong>v1.0.5</strong>
+                                    </div>
+                                    <h3 class="patch-title">Otomatik Güncelleyici (OTA) & Canlı Ağ Takibi</h3>
+                                </div>
+                                <span class="patch-date">📅 1 Ekim 2026</span>
+                            </div>
+
+                            <div class="patch-card-body">
+                                <div class="patch-highlight-grid">
+                                    <div class="patch-highlight-item">
+                                        <div class="item-icon">🔄</div>
+                                        <div class="item-content">
+                                            <strong>Uygulama İçi Tek Tıkla Güncelleme</strong>
+                                            <p>Yeni bir FPN sürümü çıktığında dosya arama derdi olmadan, doğrudan uygulama içinden tek tıkla indirip yeniden başlatarak kurma motoru devreye alındı.</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="patch-highlight-item">
+                                        <div class="item-icon">📜</div>
+                                        <div class="item-content">
+                                            <strong>Canlı Konsol Kayıtları (sing-box Live Logs)</strong>
+                                            <p>VPN çekirdeğinin tüm ağ yönlendirmelerini ve anlık etkinliklerini şeffaf şekilde izleyebileceğiniz canlı konsol ekranı eklendi.</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="patch-highlight-item">
+                                        <div class="item-icon">⏱️</div>
+                                        <div class="item-content">
+                                            <strong>Bağlantı Süresi & Ping Göstergesi</strong>
+                                            <p>Bağlantınızın ne kadar süredir aktif olduğunu ve sunucuyla olan anlık gecikme sürenizi gösteren canlı göstergeler eklendi.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SÜRÜM 1.0.0 -->
+                        <div class="patch-card">
+                            <div class="patch-card-header">
+                                <div class="patch-title-wrap">
+                                    <div class="patch-version-tag">
+                                        <strong>v1.0.0</strong>
+                                    </div>
+                                    <h3 class="patch-title">FPN Freedom Private Network İlk Resmi Yayını</h3>
+                                </div>
+                                <span class="patch-date">📅 15 Eylül 2026</span>
+                            </div>
+
+                            <div class="patch-card-body">
+                                <div class="patch-highlight-grid">
+                                    <div class="patch-highlight-item">
+                                        <div class="item-icon">🚀</div>
+                                        <div class="item-content">
+                                            <strong>Özgür İnternet Hareketi Başladı</strong>
+                                            <p>Herkes için tamamen ücretsiz, açık kaynaklı, reklamsız ve sansürsüz internet hedefiyle FPN'in ilk kararlı sürümü hayata geçirildi.</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="patch-highlight-item">
+                                        <div class="item-icon">🌍</div>
+                                        <div class="item-content">
+                                            <strong>Sınırsız ve Kotasız Kullanım</strong>
+                                            <p>Hız limiti veya bant genişliği kotası olmadan Discord, YouTube, Instagram ve tüm engelli platformlara güvenli erişim sağlandı.</p>
                                         </div>
                                     </div>
                                 </div>
@@ -1107,30 +1209,44 @@
         </div>
     </div>
 
-    <!-- MODAL: YAMA NOTLARI & YENİLİKLER -->
-    <div class="modal-overlay" id="modalPatchNotes" style="display: none;">
+    <!-- MODAL: FATCH NOTES -->
+    <div class="modal-overlay" id="modalFatchnotes" style="display: none;">
         <div class="modal-box patchnotes-modal-box">
             <div class="modal-header">
                 <div>
-                    <span class="card-badge patch-badge">✨ YENİLİKLER & YAMA NOTLARI</span>
-                    <h3 id="patchNotesModalTitle">FPN v1.1.1 Yenilikleri</h3>
-                    <p class="modal-sub" id="patchNotesModalSubtitle">Bu sürümde sizin için neler değişti ve nelerin iyileştirildiğini görün.</p>
+                    <span class="card-badge patch-badge">✨ FATCH NOTES</span>
+                    <h3 id="fatchNotesModalTitle">FPN v1.1.2 Fatch Notes</h3>
+                    <p class="modal-sub" id="fatchNotesModalSubtitle">Bu sürümde sizin için neler değiştiğini sade bir dille inceleyin.</p>
                 </div>
-                <button class="modal-close-btn" onclick="closePatchNotesModal()">✕</button>
+                <button class="modal-close-btn" onclick="closeFatchNotesModal()">✕</button>
             </div>
-            <div class="patchnotes-modal-content" id="patchNotesModalContent">
+            <div class="patchnotes-modal-content" id="fatchNotesModalContent">
                 <div class="modal-patch-list">
                     <div class="modal-patch-item">
                         <span class="modal-patch-icon">📱</span>
                         <div>
-                            <strong>Telefon İçin Kolay İndirme (Android APK)</strong>
-                            <p>Artık telefonunuzun kamerasını ekrandaki QR koda tutarak Android uygulamasını saniyeler içinde doğrudan telefonunuza indirebilirsiniz.</p>
+                            <strong>Telefon İçin İndir & Dinamik APK QR Kodu</strong>
+                            <p>Telefonunuzun kamerasını QR koda tutarak en son Android APK dosyasını doğrudan telefonunuza indirebilirsiniz. Tek tıkla indirme ve link kopyalama eklendi.</p>
+                        </div>
+                    </div>
+                    <div class="modal-patch-item">
+                        <span class="modal-patch-icon">📖</span>
+                        <div>
+                            <strong>Kullanıcı Dostu Fatch Notes Sistemi</strong>
+                            <p>Her güncellemede yapılan tüm yeniliklerin teknik jargondan uzak, herkesin rahatça anlayabileceği sade bir dille anlatıldığı sürüm günlüğü ekranı eklendi.</p>
+                        </div>
+                    </div>
+                    <div class="modal-patch-item">
+                        <span class="modal-patch-icon">🎨</span>
+                        <div>
+                            <strong>Yenilenen Mobil Ayarlar GUI</strong>
+                            <p>Telefonda taşmaları engelleyen kaydırılabilir yeni ayarlar çekmecesi, modern tutamaç ve özel simgeli kartlar getirildi.</p>
                         </div>
                     </div>
                     <div class="modal-patch-item">
                         <span class="modal-patch-icon">🪟</span>
                         <div>
-                            <strong>Windows 10 & 11 Pürüzsüz Çalışma</strong>
+                            <strong>Windows 10 & 11 Sessiz ve Pürüzsüz Bağlantı</strong>
                             <p>Siyah pencere ve yetki sorunları giderildi. Tek tıkla sessiz, sorunsuz ve güvenli tünelleme aktif olur.</p>
                         </div>
                     </div>
@@ -1158,8 +1274,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn-secondary" onclick="closePatchNotesModal()">Kapat</button>
-                <button type="button" class="btn-primary" onclick="closePatchNotesModal(); switchTab('patchnotes');">📖 Tüm Sürüm Geçmişini Gör</button>
+                <button type="button" class="btn-secondary" onclick="closeFatchNotesModal()">Kapat</button>
+                <button type="button" class="btn-primary" onclick="closeFatchNotesModal(); switchTab('fatchnotes');">📖 Tüm Sürüm Geçmişini Gör</button>
             </div>
         </div>
     </div>

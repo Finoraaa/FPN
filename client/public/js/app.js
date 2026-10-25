@@ -44,8 +44,38 @@ function switchTab(tabId) {
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
 
-    const targetPanel = document.getElementById('panel' + tabId.charAt(0).toUpperCase() + tabId.slice(1));
-    const targetBtn = document.getElementById('tabBtn' + tabId.charAt(0).toUpperCase() + tabId.slice(1));
+    const lower = tabId.toLowerCase();
+    const capitalized = tabId.charAt(0).toUpperCase() + tabId.slice(1);
+
+    const panelCandidates = [
+        'panel' + capitalized,
+        'panel' + lower,
+        'panel' + tabId,
+        lower.includes('note') ? 'panelFatchnotes' : null,
+        lower.includes('note') ? 'panelFaarchnotes' : null,
+        lower.includes('note') ? 'panelPatchNotes' : null
+    ].filter(Boolean);
+
+    const btnCandidates = [
+        'tabBtn' + capitalized,
+        'tabBtn' + lower,
+        'tabBtn' + tabId,
+        lower.includes('note') ? 'tabBtnFatchnotes' : null,
+        lower.includes('note') ? 'tabBtnFaarchnotes' : null,
+        lower.includes('note') ? 'tabBtnPatchNotes' : null
+    ].filter(Boolean);
+
+    let targetPanel = null;
+    for (const id of panelCandidates) {
+        targetPanel = document.getElementById(id);
+        if (targetPanel) break;
+    }
+
+    let targetBtn = null;
+    for (const id of btnCandidates) {
+        targetBtn = document.getElementById(id);
+        if (targetBtn) break;
+    }
 
     if (targetPanel) targetPanel.classList.add('active');
     if (targetBtn) targetBtn.classList.add('active');
@@ -60,7 +90,9 @@ function switchTab(tabId) {
         nodes: { title: "Sunucular & Düğümler", desc: "Cloudflare Workers veya VLESS çıkış noktalarınızı yönetin ve test edin" },
         speedtest: { title: "Dahili Hız Testi", desc: "Cloudflare CDN omurgası üzerinden gerçek indirme hızı ve gecikmeyi ölçün" },
         mobile: { title: "Telefon İçin İndir", desc: "Telefonunuzun kamerasıyla QR kodu taratarak Android APK'sını doğrudan indirin veya kurulum rehberini izleyin" },
-        patchnotes: { title: "Yama Notları & Sürüm Günlükleri", desc: "Her güncellemede yapılan iyileştirmelerin ve yeniliklerin sade dille anlatımı" },
+        fatchnotes: { title: "Fatch Notes & Sürüm Günlükleri", desc: "FPN'in bugüne kadarki tüm güncellemeleri ve yenilikleri (Normal kullanıcı anlatımıyla)" },
+        faarchnotes: { title: "Fatch Notes & Sürüm Günlükleri", desc: "FPN'in bugüne kadarki tüm güncellemeleri ve yenilikleri (Normal kullanıcı anlatımıyla)" },
+        patchnotes: { title: "Fatch Notes & Sürüm Günlükleri", desc: "FPN'in bugüne kadarki tüm güncellemeleri ve yenilikleri (Normal kullanıcı anlatımıyla)" },
         donate: { title: "Geliştiriciye Destek & Bağış (donatr.ee)", desc: "FPN'in tamamen ücretsiz, sınırsız ve sansürsüz kalmasına katkıda bulunun" },
         feedback: { title: "Geri Bildirim & Topluluk", desc: "Geri bildirimleriniz ile daha iyi projeler yapacağız. Fikir ve önerilerinizi bizimle paylaşın" },
         settings: { title: "Sansür Koruması & Ayarlar", desc: "DNS over HTTPS, portlar ve Türkiye bölünmüş tünel kurallarını yapılandırın" },
@@ -1485,6 +1517,8 @@ window.addEventListener('keydown', (e) => {
         if (typeof closeImportSubModal === 'function') closeImportSubModal();
         if (typeof closeCleanIpScannerModal === 'function') closeCleanIpScannerModal();
         if (typeof closeLeakTestModal === 'function') closeLeakTestModal();
+        if (typeof closeFatchNotesModal === 'function') closeFatchNotesModal();
+        if (typeof closeFaarchNotesModal === 'function') closeFaarchNotesModal();
         if (typeof closePatchNotesModal === 'function') closePatchNotesModal();
     }
 });
@@ -1608,22 +1642,27 @@ function dismissUpdateBanner() {
 }
 
 // ====================================================================
-// Patch Notes Modal Controller
+// Fatch Notes Modal Controller
 // ====================================================================
-function openPatchNotesModal() {
-    const modal = document.getElementById('modalPatchNotes');
+function openFatchNotesModal() {
+    const modal = document.getElementById('modalFatchnotes') || document.getElementById('modalFaarchnotes') || document.getElementById('modalPatchNotes');
     if (!modal) return;
     if (currentAppUpdate && currentAppUpdate.latestVersion) {
-        const title = document.getElementById('patchNotesModalTitle');
-        if (title) title.innerText = `FPN v${currentAppUpdate.latestVersion} Yenilikleri`;
+        const title = document.getElementById('fatchNotesModalTitle') || document.getElementById('faarchNotesModalTitle') || document.getElementById('patchNotesModalTitle');
+        if (title) title.innerText = `FPN v${currentAppUpdate.latestVersion} Fatch Notes`;
     }
     modal.style.display = 'flex';
 }
 
-function closePatchNotesModal() {
-    const modal = document.getElementById('modalPatchNotes');
+function closeFatchNotesModal() {
+    const modal = document.getElementById('modalFatchnotes') || document.getElementById('modalFaarchnotes') || document.getElementById('modalPatchNotes');
     if (modal) modal.style.display = 'none';
 }
+
+const openFaarchNotesModal = openFatchNotesModal;
+const closeFaarchNotesModal = closeFatchNotesModal;
+const openPatchNotesModal = openFatchNotesModal;
+const closePatchNotesModal = closeFatchNotesModal;
 
 
 
