@@ -1655,13 +1655,27 @@ function checkGitHubUpdates() {
 
                     let matchedAsset = null;
                     if (Array.isArray(release.assets)) {
+                        let platformAssets = [];
                         if (isWin) {
-                            matchedAsset = release.assets.find(a => a.name.endsWith('Setup.exe') || a.name.endsWith('.exe'));
+                            platformAssets = release.assets.filter(a => a.name.endsWith('.exe'));
+                            const setupAssets = platformAssets.filter(a => a.name.toLowerCase().includes('setup'));
+                            if (setupAssets.length > 0) platformAssets = setupAssets;
                         } else if (isMac) {
-                            matchedAsset = release.assets.find(a => a.name.endsWith('.dmg'));
+                            platformAssets = release.assets.filter(a => a.name.endsWith('.dmg'));
                         } else {
-                            matchedAsset = release.assets.find(a => a.name.endsWith('.AppImage')) || release.assets.find(a => a.name.endsWith('.deb'));
+                            platformAssets = release.assets.filter(a => a.name.endsWith('.AppImage'));
+                            if (platformAssets.length === 0) {
+                                platformAssets = release.assets.filter(a => a.name.endsWith('.deb'));
+                            }
                         }
+
+                        // 1. Öncelik: En güncel sürüm numarasını (örn: 1.1.0) içeren dosya
+                        // 2. Öncelik: Mevcut eski sürümü İÇERMEYEN dosya
+                        // 3. Öncelik: En son yüklenen dosya
+                        matchedAsset = platformAssets.find(a => a.name.includes(latestVer)) ||
+                                       platformAssets.find(a => !a.name.includes(appVersion)) ||
+                                       platformAssets[platformAssets.length - 1] ||
+                                       platformAssets[0] || null;
                     }
 
                     updateState.hasUpdate = hasUpdate;
