@@ -6,20 +6,20 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Default Fallback Release State (v1.1.0)
+    // Default Fallback Release State (v1.1.1)
     const releaseConfig = {
         repo: 'Finoraaa/FPN',
-        version: '1.1.0',
-        tag: 'v1.1.0',
-        baseUrl: 'https://github.com/Finoraaa/FPN/releases/download/v1.1.0/',
+        version: '1.1.1',
+        tag: 'v1.1.1',
+        baseUrl: 'https://github.com/Finoraaa/FPN/releases/download/v1.1.1/',
         assets: {
-            winSetup: 'FPN-Setup-1.1.0.exe',
-            winPortable: 'FPN-1.1.0.exe',
+            winSetup: 'FPN-Setup-1.1.1.exe',
+            winPortable: 'FPN-1.1.1.exe',
             androidApk: 'FPN-Android.apk',
-            linuxAppImage: 'FPN-1.1.0.AppImage',
-            linuxDeb: 'fpn-vpn_1.1.0_amd64.deb',
-            macDmg: 'FPN-1.1.0-arm64.dmg',
-            macZip: 'FPN-1.1.0-arm64-mac.zip',
+            linuxAppImage: 'FPN-1.1.1.AppImage',
+            linuxDeb: 'fpn-vpn_1.1.1_amd64.deb',
+            macDmg: 'FPN-1.1.1-arm64.dmg',
+            macZip: 'FPN-1.1.1-arm64-mac.zip',
             webExt: 'fpn-web-extension.zip'
         }
     };
@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
             name: 'Masaüstü Cihazınız',
             icon: '💻',
             assetKey: 'winSetup',
-            buttonText: 'Hemen İndirin (v1.1.0)',
+            buttonText: 'Hemen İndirin (v1.1.1)',
             filename: releaseConfig.assets.winSetup
         };
     }
@@ -147,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!res.ok) return;
 
             const data = await res.json();
-            const tag = data.tag_name || 'v1.1.0';
+            const tag = data.tag_name || 'v1.1.1';
             const ver = tag.replace(/^v/, '');
 
             releaseConfig.tag = tag;

@@ -2385,6 +2385,29 @@ body {
     color: #34d399;
 }
 
+.btn-update-patchnotes {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #e2e8f0;
+    font-family: var(--font-main);
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-update-patchnotes:hover {
+    background: rgba(255, 255, 255, 0.16);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+}
+
 .btn-update-cta {
     display: inline-flex;
     align-items: center;
@@ -2746,6 +2769,471 @@ body {
     }
     .feedback-action-btn, .feedback-copy-btn {
         width: 100%;
+    }
+}
+
+/* ====================================================================
+   TELEFON İÇİN İNDİR (APK QR & DOWNLOAD CARD)
+   ==================================================================== */
+.card-badge-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.apk-badge {
+    background: rgba(16, 185, 129, 0.15) !important;
+    border-color: rgba(16, 185, 129, 0.35) !important;
+    color: #34d399 !important;
+}
+
+.apk-version-chip {
+    font-size: 0.72rem;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    padding: 3px 10px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 999px;
+    color: #94a3b8;
+}
+
+.apk-download-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.apk-download-card::before {
+    content: '';
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 140px;
+    height: 140px;
+    background: radial-gradient(circle, rgba(16, 185, 129, 0.18) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.apk-qr-box {
+    background: #ffffff !important;
+    padding: 18px !important;
+    border-radius: 20px !important;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5), 0 0 30px rgba(16, 185, 129, 0.2) !important;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.apk-qr-box:hover {
+    transform: scale(1.02);
+    box-shadow: 0 16px 45px rgba(0, 0, 0, 0.6), 0 0 35px rgba(16, 185, 129, 0.35) !important;
+}
+
+.apk-meta-info-bar {
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid var(--border-subtle);
+    border-radius: 14px;
+    padding: 10px 16px;
+    margin: 16px 0 14px 0;
+}
+
+.apk-file-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.apk-file-icon {
+    font-size: 1.4rem;
+}
+
+.apk-file-details {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.apk-file-details strong {
+    font-size: 0.88rem;
+    color: #ffffff;
+    font-family: var(--font-mono);
+}
+
+.apk-file-details span {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.apk-actions-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.btn-download-apk {
+    flex: 1.3;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-weight: 700;
+    padding: 12px 16px;
+    font-size: 0.88rem;
+}
+
+.btn-copy-apk-link {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    color: #ffffff;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-copy-apk-link:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+}
+
+.scan-guide-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 14px;
+    background: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: 12px;
+    font-size: 0.8rem;
+    color: #cbd5e1;
+    line-height: 1.45;
+}
+
+.scan-guide-box .guide-icon {
+    font-size: 1.1rem;
+    margin-top: 1px;
+}
+
+.scan-guide-box strong {
+    color: #34d399;
+}
+
+.feature-pills-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 20px;
+}
+
+.feature-pill {
+    font-size: 0.74rem;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+    padding: 5px 12px;
+    color: #94a3b8;
+}
+
+.subtab-intro {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 14px;
+    line-height: 1.5;
+}
+
+.vless-qr-center {
+    display: flex;
+    justify-content: center;
+    margin: 12px 0 16px 0;
+}
+
+.vless-qr-container {
+    margin: 0 !important;
+}
+
+/* ====================================================================
+   YAMA NOTLARI (PATCH NOTES) SECTION
+   ==================================================================== */
+.patchnotes-container {
+    max-width: 980px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
+.patchnotes-header-card {
+    background: var(--bg-surface);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--border-subtle);
+    border-radius: 20px;
+    padding: 28px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    position: relative;
+    overflow: hidden;
+}
+
+.patchnotes-header-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, #10b981 0%, #3b82f6 100%);
+}
+
+.patchnotes-header-card .header-content h2 {
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 8px 0 6px 0;
+}
+
+.patchnotes-header-card .header-content .subtitle {
+    font-size: 0.86rem;
+    color: var(--text-secondary);
+    max-width: 620px;
+    line-height: 1.5;
+}
+
+.patch-badge {
+    background: rgba(59, 130, 246, 0.15) !important;
+    border-color: rgba(59, 130, 246, 0.35) !important;
+    color: #60a5fa !important;
+}
+
+.current-ver-chip {
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+    padding: 12px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.current-ver-chip .chip-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+}
+
+.current-ver-chip .chip-val {
+    font-size: 1rem;
+    font-weight: 800;
+    color: #34d399;
+    font-family: var(--font-mono);
+}
+
+.patchnotes-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.patch-card {
+    background: var(--bg-surface);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--border-subtle);
+    border-radius: 20px;
+    padding: 28px 30px;
+    transition: var(--transition);
+}
+
+.patch-card:hover {
+    border-color: rgba(255, 255, 255, 0.18);
+    transform: translateY(-2px);
+}
+
+.patch-card.latest {
+    border-color: rgba(16, 185, 129, 0.35);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(16, 185, 129, 0.08);
+}
+
+.patch-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1px solid var(--border-subtle);
+    padding-bottom: 18px;
+    margin-bottom: 20px;
+    gap: 16px;
+}
+
+.patch-version-tag {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.patch-version-tag strong {
+    font-family: var(--font-mono);
+    font-size: 1.15rem;
+    color: #ffffff;
+}
+
+.badge-latest {
+    font-size: 0.68rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
+    padding: 2px 8px;
+    border-radius: 999px;
+    letter-spacing: 0.5px;
+}
+
+.pulse-dot-emerald {
+    width: 8px;
+    height: 8px;
+    background: #10b981;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #10b981;
+    animation: pulseDot 2s infinite;
+}
+
+.patch-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #e2e8f0;
+}
+
+.patch-date {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    white-space: nowrap;
+}
+
+.patch-highlight-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: 16px;
+}
+
+.patch-highlight-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 14px;
+    padding: 16px;
+    transition: var(--transition);
+}
+
+.patch-highlight-item:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+.item-icon {
+    font-size: 1.45rem;
+    flex-shrink: 0;
+    line-height: 1;
+    margin-top: 2px;
+}
+
+.item-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.item-content strong {
+    font-size: 0.88rem;
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.item-content p {
+    font-size: 0.81rem;
+    color: var(--text-secondary);
+    line-height: 1.48;
+    margin: 0;
+}
+
+.item-content em {
+    color: #34d399;
+    font-style: normal;
+    font-weight: 600;
+}
+
+/* ====================================================================
+   PATCH NOTES MODAL
+   ==================================================================== */
+.patchnotes-modal-box {
+    max-width: 580px !important;
+}
+
+.patchnotes-modal-content {
+    max-height: 380px;
+    overflow-y: auto;
+    padding-right: 6px;
+    margin: 14px 0;
+}
+
+.modal-patch-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.modal-patch-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 14px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 12px;
+}
+
+.modal-patch-icon {
+    font-size: 1.3rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.modal-patch-item strong {
+    font-size: 0.86rem;
+    color: #ffffff;
+}
+
+.modal-patch-item p {
+    font-size: 0.79rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    margin: 3px 0 0 0;
+}
+
+@media (max-width: 900px) {
+    .patch-highlight-grid {
+        grid-template-columns: 1fr;
+    }
+    .patchnotes-header-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .current-ver-chip {
+        width: 100%;
+        flex-direction: row;
+        justify-content: space-between;
     }
 }
 

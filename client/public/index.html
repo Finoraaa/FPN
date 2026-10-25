@@ -46,7 +46,11 @@
                 </button>
                 <button class="nav-btn" id="tabBtnMobile" onclick="switchTab('mobile')">
                     <span class="icon">📱</span>
-                    <span class="label">Telefona Aktar</span>
+                    <span class="label">Telefon İçin İndir</span>
+                </button>
+                <button class="nav-btn" id="tabBtnPatchNotes" onclick="switchTab('patchnotes')">
+                    <span class="icon">✨</span>
+                    <span class="label">Yama Notları</span>
                 </button>
                 <button class="nav-btn" id="tabBtnDonate" onclick="switchTab('donate')">
                     <span class="icon">💖</span>
@@ -74,7 +78,7 @@
                         <strong class="status-state" id="sidebarStatusText">Bağlı Değil</strong>
                     </div>
                 </div>
-                <div class="version-tag">FPN v1.1.0 • sing-box Core</div>
+                <div class="version-tag" onclick="switchTab('patchnotes')" style="cursor: pointer;" title="Yama notlarını görüntüle">FPN v1.1.1 • sing-box Core</div>
             </div>
         </aside>
 
@@ -96,6 +100,10 @@
                         </div>
                         <span class="update-progress-label" id="updateProgressLabel">İndiriliyor: %0</span>
                     </div>
+                    <button class="btn-update-patchnotes" id="btnUpdatePatchNotes" onclick="openPatchNotesModal()">
+                        <span class="cta-icon">📖</span>
+                        <span class="cta-text">Yama Notları</span>
+                    </button>
                     <button class="btn-update-cta" id="btnUpdateCta" onclick="triggerUpdateFlow()">
                         <span class="cta-icon">⚡</span>
                         <span class="cta-text" id="btnUpdateCtaText">Tek Tıkla Güncelle</span>
@@ -280,54 +288,116 @@
                 </div>
             </section>
 
-            <!-- TAB 3: MOBILE QR TRANSFER -->
+            <!-- TAB 3: TELEFON İÇİN İNDİR (ANDROID APK QR & KURULUM) -->
             <section class="tab-panel" id="panelMobile">
                 <div class="mobile-transfer-grid">
-                    <div class="qr-presentation-card">
-                        <span class="card-badge">MOBİL HIZLI BAĞLANTI</span>
-                        <h3>Telefonunuzdan QR Kodu Tarayın</h3>
-                        <p class="subtitle">Bu QR kod telefonunuzdaki VPN uygulaması tarafından doğrudan okunabilir ve tek tıkla bağlanır.</p>
+                    <!-- Sol Kart: FPN Mobil Android APK İndir (QR & Doğrudan İndirme) -->
+                    <div class="qr-presentation-card apk-download-card">
+                        <div class="card-badge-row">
+                            <span class="card-badge apk-badge">🤖 RESMİ ANDROID SÜRÜMÜ</span>
+                            <span class="apk-version-chip" id="apkVersionChip">v1.1.1</span>
+                        </div>
+                        <h3>Telefonunuz İçin İndirin</h3>
+                        <p class="subtitle">Telefonunuzun kamerasını aşağıdaki QR koda tutun; en güncel <b>FPN Android APK</b> dosyası doğrudan telefonunuza insin.</p>
 
-                        <div class="qr-container-box">
-                            <div id="desktopQrCode"></div>
+                        <div class="qr-container-box apk-qr-box">
+                            <div id="apkQrCode"></div>
                         </div>
 
-                        <div class="vless-code-box">
-                            <input type="text" id="vlessLinkInput" readonly value="vless://..." />
-                            <button class="btn-copy" onclick="copyVlessLink()">📋 Kopyala</button>
+                        <div class="apk-meta-info-bar">
+                            <div class="apk-file-item">
+                                <span class="apk-file-icon">📦</span>
+                                <div class="apk-file-details">
+                                    <strong id="apkFileNameText">FPN-Android.apk</strong>
+                                    <span id="apkFileSizeText">Android 8.0 ve Üzeri • Güvenli & Reklamsız</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="apk-actions-row">
+                            <button class="btn-primary btn-download-apk" onclick="downloadApkDirect(event)">
+                                <span class="btn-icon">📥</span> Doğrudan APK İndir
+                            </button>
+                            <button class="btn-secondary btn-copy-apk-link" onclick="copyApkDownloadLink()">
+                                <span class="btn-icon">📋</span> Linki Kopyala
+                            </button>
+                        </div>
+
+                        <div class="scan-guide-box">
+                            <span class="guide-icon">📸</span>
+                            <div class="guide-text">
+                                <strong>Nasıl İndirilir?</strong> Telefonunuzun kamerasını açıp QR kodu kadraja alın. Ekranda çıkan indirme bağlantısına dokunmanız yeterlidir.
+                            </div>
                         </div>
                     </div>
 
+                    <!-- Sağ Kart: Mobil Kurulum Kılavuzu & Alternatif VLESS -->
                     <div class="mobile-instructions-card">
-                        <h3>Telefon Kurulum Adımları</h3>
+                        <h3>Mobil Kurulum & Alternatifler</h3>
 
                         <div class="instruction-tabs">
-                            <button class="sub-tab-btn active" onclick="switchMobileSubTab('android')">🤖 Android</button>
-                            <button class="sub-tab-btn" onclick="switchMobileSubTab('ios')">🍏 iOS (iPhone / iPad)</button>
+                            <button class="sub-tab-btn active" id="btnSubTabAndroid" onclick="switchMobileSubTab('android')">🤖 Android (APK)</button>
+                            <button class="sub-tab-btn" id="btnSubTabIos" onclick="switchMobileSubTab('ios')">🍏 iOS (iPhone & iPad)</button>
+                            <button class="sub-tab-btn" id="btnSubTabVless" onclick="switchMobileSubTab('vless')">⚡ VLESS Sunucusu Aktar</button>
                         </div>
 
+                        <!-- Alt Sekme 1: Android Kurulum -->
                         <div class="sub-tab-content active" id="subTabAndroid">
                             <ol class="step-list">
-                                <li>Google Play Store'dan ücretsiz <b>v2rayNG</b> veya <b>sing-box</b> uygulamasını yükleyin.</li>
-                                <li>Uygulamayı açın ve sağ üstteki <b>"+" (Ekle)</b> butonuna dokunun.</li>
-                                <li><b>"QR Kodunu Tara"</b> (Scan QR Code) seçeneğini seçip sol taraftaki QR kodu telefonunuzun kamerasıyla taratın.</li>
-                                <li>Eklenen sunucuya dokunun ve alttaki <b>V (Bağlan)</b> butonuna basın!</li>
-                                <li>Artık telefonunuzda da sansürsüz ve tamamen ücretsiz internetiniz aktif!</li>
+                                <li>
+                                    <strong>1. APK'yı İndirin:</strong> Sol taraftaki QR kodu telefonunuzun kamerasıyla taratın veya doğrudan <em>"Doğrudan APK İndir"</em> butonuna dokunun.
+                                </li>
+                                <li>
+                                    <strong>2. Kuruluma İzin Verin:</strong> İndirilen <code>FPN-Android.apk</code> dosyasına dokunun. Telefonunuz güvenlik uyarısı verirse <em>"Bilinmeyen kaynaklardan yüklemeye izin ver"</em> ve <em>"Yine de yükle"</em> seçeneğini onaylayın (FPN tamamen açık kaynaklı ve güvenlidir).
+                                </li>
+                                <li>
+                                    <strong>3. Tek Dokunuşla Bağlanın:</strong> FPN Mobil uygulamasını açın ve ortadaki kalkan butonuna dokunun. Android VPN iznini onayladığınız an telefonunuz da sansürsüz ve hızlı internete kavuşur!
+                                </li>
+                            </ol>
+
+                            <div class="feature-pills-row">
+                                <span class="feature-pill">🛡️ Reklamsız & Tamamen Ücretsiz</span>
+                                <span class="feature-pill">⚡ VLESS + TLS 1.3 Altyapısı</span>
+                                <span class="feature-pill">🔄 Otomatik Sunucu Eşitleme</span>
+                            </div>
+                        </div>
+
+                        <!-- Alt Sekme 2: iOS Kurulum -->
+                        <div class="sub-tab-content" id="subTabIos">
+                            <ol class="step-list">
+                                <li>
+                                    <strong>1. Uygulamayı İndirin:</strong> App Store'dan ücretsiz <b>FoXray</b>, <b>Streisand</b> veya <b>Shadowrocket</b> uygulamasını yükleyin.
+                                </li>
+                                <li>
+                                    <strong>2. Yapılandırmayı Ekleyin:</strong> Uygulamayı açın, sağ üstteki <b>"+" (Ekle)</b> butonuna dokunun ve <em>"VLESS Sunucusu Aktar"</em> sekmesindeki QR kodu kameranızla okutun.
+                                </li>
+                                <li>
+                                    <strong>3. Bağlanın:</strong> Eklenen sunucuya dokunup <b>Connect (Bağlan)</b> butonuna basın ve iOS VPN izinlerini onaylayın!
+                                </li>
+                                <li>
+                                    <strong>4. Özgürce Gezinin:</strong> Instagram, Twitter (X), Discord, YouTube ve tüm engelli siteler iPhone'unuzda anında açılır.
+                                </li>
                             </ol>
                         </div>
 
-                        <div class="sub-tab-content" id="subTabIos">
-                            <ol class="step-list">
-                                <li>App Store'dan ücretsiz <b>FoXray</b>, <b>Streisand</b> veya <b>Shadowrocket</b> uygulamasını indirin.</li>
-                                <li>Uygulamayı açın ve sağ üstteki <b>"+"</b> butonuna dokunun.</li>
-                                <li>Kamerayı açarak sol taraftaki QR kodu okutun veya bağlantı kodunu yapıştırın.</li>
-                                <li><b>Connect (Bağlan)</b> butonuna basın ve VPN izinlerini onaylayın!</li>
-                                <li>Instagram, Discord, Twitter ve tüm engelli siteler telefonunuzda anında açılır.</li>
-                            </ol>
+                        <!-- Alt Sekme 3: Mevcut VLESS Sunucusu Aktar (Eski QR) -->
+                        <div class="sub-tab-content" id="subTabVless">
+                            <p class="subtab-intro">Masaüstündeki aktif Cloudflare / VLESS sunucunuzu harici bir istemciye (v2rayNG, Streisand, Nekobox vb.) aktarmak için aşağıdaki yapılandırmayı kullanabilirsiniz:</p>
+                            
+                            <div class="vless-qr-center">
+                                <div class="qr-container-box vless-qr-container">
+                                    <div id="desktopQrCode"></div>
+                                </div>
+                            </div>
+
+                            <div class="vless-code-box">
+                                <input type="text" id="vlessLinkInput" readonly value="vless://..." />
+                                <button class="btn-copy" onclick="copyVlessLink()">📋 Kopyala</button>
+                            </div>
                         </div>
 
                         <div class="tip-box">
-                            💡 <b>İpucu:</b> Telefonunuz hücresel veride (mobil internet) veya farklı bir Wi-Fi'da olsa bile bu bağlantı Cloudflare Edge üzerinden kesintisiz çalışır.
+                            💡 <b>İpucu:</b> Telefonunuz hücresel veride (mobil internet) veya farklı bir Wi-Fi ağında olsa bile bu bağlantı Cloudflare Edge üzerinden kesintisiz ve kotasız çalışır.
                         </div>
                     </div>
                 </div>
@@ -661,6 +731,204 @@
                         </div>
                     </div>
                     <pre class="terminal-body" id="terminalOutput">FPN konsolu hazır...</pre>
+            <!-- TAB 6: PATCH NOTES / YAMA NOTLARI -->
+            <section class="tab-panel" id="panelPatchNotes">
+                <div class="patchnotes-container">
+                    <div class="patchnotes-header-card">
+                        <div class="header-content">
+                            <span class="card-badge patch-badge">✨ SÜRÜM GÜNLÜĞÜ</span>
+                            <h2>FPN Yama Notları (Patch Notes)</h2>
+                            <p class="subtitle">Her güncellemede yapılan iyileştirmeleri, yeni özellikleri ve çözülen hataları herkesin rahatça anlayabileceği sade bir dille buradan takip edebilirsiniz.</p>
+                        </div>
+                        <div class="current-ver-chip">
+                            <span class="chip-label">KULLANDIĞINIZ SÜRÜM</span>
+                            <strong class="chip-val">v1.1.1 (En Güncel)</strong>
+                        </div>
+                    </div>
+
+                    <div class="patchnotes-timeline">
+                        <!-- SÜRÜM 1.1.1 -->
+                        <div class="patch-card latest">
+                            <div class="patch-card-header">
+                                <div class="patch-title-wrap">
+                                    <div class="patch-version-tag">
+                                        <span class="pulse-dot-emerald"></span>
+                                        <strong>v1.1.1</strong>
+                                        <span class="badge-latest">EN GÜNCEL SÜRÜM</span>
+                                    </div>
+                                    <h3 class="patch-title">Telefon İçin İndir (APK QR Kodu) & Yama Notları</h3>
+                                </div>
+                                <span class="patch-date">📅 25 Ekim 2026</span>
+                            </div>
+
+                            <div class="patch-card-body">
+                                <div class="patch-highlight-grid">
+                                    <div class="patch-highlight-item">
+                                        <div class="item-icon">📱</div>
+                                        <div class="item-content">
+                                            <strong>Telefon İçin Kolay İndirme (Dinamik APK QR Kodu)</strong>
+                                            <p>Telefonunuza FPN kurmak artık tek adım! <em>"Telefon İçin İndir"</em> sekmesindeki QR kodu telefonunuzun kamerasına tutarak en son Android APK dosyasını doğrudan telefonunuza indirebilirsiniz. Tek tıkla indirme ve bağlantı kopyalama butonları eklendi.</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="patch-highlight-item">
+                                        <div class="item-icon">📖</div>
+                                        <div class="item-content">
+                                            <strong>Kullanıcı Dostu Yama Notları (Patch Notes)</strong>
+                                            <p>Her güncellemede yapılan yeniliklerin ve düzeltmelerin teknik karmaşadan uzak, herkesin kolayca anlayabileceği sade bir dille anlatıldığı Yama Notları sayfası ve güncelleme önizleme penceresi eklendi.</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="patch-highlight-item">
+                                        <div class="item-icon">🔄</div>
+                                        <div class="item-content">
+                                            <strong>Otomatik APK Güncelleme Entegrasyonu</strong>
+                                            <p>Yeni bir FPN sürümü yayınlandığında ekrandaki QR kod ve doğrudan indirme bağlantıları otomatik olarak en güncel APK dosyasına güncellenir.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SÜRÜM 1.1.0 -->
+                        <div class="patch-card">
+                            <div class="patch-card-header">
+                                <div class="patch-title-wrap">
+                                    <div class="patch-version-tag">
+                                        <strong>v1.1.0</strong>
+                                    </div>
+                                    <h3 class="patch-title">Büyük Kararlılık, Çoklu Platform & Sistem VPN Modu</h3>
+                                </div>
+                                <span class="patch-date">📅 25 Ekim 2026</span>
+                            </div>
+
+                            <div class="patch-card-body">
+                                <div class="patch-highlight-grid">
+                                    <div class="patch-highlight-item">
+                                        <div class="item-icon">📱</div>
+                                        <div class="item-content">
+                                            <strong>Telefon İçin Kolay İndirme (Android APK & QR Kod)</strong>
+                                            <p>Telefonunuza FPN yüklemek artık tek adım! <em>"Telefon İçin İndir"</em> sekmesindeki QR kodu telefonunuzun kamerasına tutarak en son Android APK dosyasını saniyeler içinde doğrudan telefonunuza indirebilirsiniz. Ekstra karmaşık ayar yapmanıza gerek kalmadı.</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="patch-highlight-item">
+                                        <div class="item-icon">🪟</div>
+                                        <div class="item-content">
+                                            <strong>Windows İçin Sessiz & Hatasız Bağlantı</strong>
+                                            <p>Windows 10 ve 11 kullanıcılarının karşılaştığı siyah komut penceresi ve yetki hataları tamamen giderildi. Artık arka planda hiçbir rahatsız edici pencere açılmadan, tek tıkla anında ve pürüzsüzce bağlanır.</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="patch-highlight-item">
+                                        <div class="item-icon">🍏</div>
+                                        <div class="item-content">
+                                            <strong>Apple Mac & iPhone Tam Uyumluluğu</strong>
+                                            <p>Mac bilgisayarlarda (yeni nesil Apple Silicon M1/M2/M3 ve Intel modelleri) ve iPhone telefonlarda yaşanan bağlantı kopmaları ve uyumsuzluklar çözüldü. Apple sistemleriyle %100 uyumlu hale getirildi.</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="patch-highlight-item">
+                                        <div class="item-icon">🐧</div>
+                                        <div class="item-content">
+                                            <strong>Linux İçin Tam Bilgisayar Koruması (TUN VPN Modu)</strong>
+                                            <p>Linux kullanıcıları için VPN koruması artık sadece web tarayıcısını değil, tüm bilgisayarı ve tüm uygulamaları (Oyunlar, Discord, Spotify vb.) tek tıkla kapsıyor. Yetki istemleri sadeleştirildi.</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="patch-highlight-item">
+                                        <div class="item-icon">⚡</div>
+                                        <div class="item-content">
+                                            <strong>Daha Hızlı Sunucular ve Düşük Gecikme (Ping)</strong>
+                                            <p>Sunucu bağlantı omurgası hızlandırıldı. İnternet hızınızda kayıp yaşamadan YouTube'da 4K video izleyebilir, Instagram ve engelli tüm sitelerde gecikmesiz gezinebilirsiniz.</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="patch-highlight-item">
+                                        <div class="item-icon">🔄</div>
+                                        <div class="item-content">
+                                            <strong>Akıllı ve Otomatik Güncelleme Sistemi</strong>
+                                            <p>Uygulama içi güncelleme sistemi yenilendi. Yeni bir sürüm çıktığında sisteminiz için en uygun kurulum dosyası otomatik olarak bulunur, tek tıkla indirilir ve güncellenir.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SÜRÜM 1.0.9 -->
+                        <div class="patch-card">
+                            <div class="patch-card-header">
+                                <div class="patch-title-wrap">
+                                    <div class="patch-version-tag">
+                                        <strong>v1.0.9</strong>
+                                    </div>
+                                    <h3 class="patch-title">Dahili Hız Testi ve Akıllı Sunucu Dağıtımı</h3>
+                                </div>
+                                <span class="patch-date">📅 20 Ekim 2026</span>
+                            </div>
+
+                            <div class="patch-card-body">
+                                <div class="patch-highlight-grid">
+                                    <div class="patch-highlight-item">
+                                        <div class="item-icon">🚀</div>
+                                        <div class="item-content">
+                                            <strong>Dahili Hız Testi Aracı</strong>
+                                            <p>FPN'e bağlıyken internetinizin gerçek indirme hızını ve gecikme süresini (ping) tek bir tıkla ölçebilmeniz için dahili Hız Testi aracı eklendi.</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="patch-highlight-item">
+                                        <div class="item-icon">🌐</div>
+                                        <div class="item-content">
+                                            <strong>Yedekli ve Otomatik Sunucu Dağıtımı</strong>
+                                            <p>Birden fazla Cloudflare sunucusu sisteme dahil edildi; sunuculardan birinde yoğunluk olduğunda otomatik olarak en hızlı alternatife bağlanma özelliği getirildi.</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="patch-highlight-item">
+                                        <div class="item-icon">💬</div>
+                                        <div class="item-content">
+                                            <strong>Geri Bildirim & İstek Bildirimi</strong>
+                                            <p>Fikirlerinizi, hata bildirimlerinizi ve önerilerinizi geliştiriciye anında iletebilmeniz için dahili Geri Bildirim formu eklendi.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SÜRÜM 1.0.8 -->
+                        <div class="patch-card">
+                            <div class="patch-card-header">
+                                <div class="patch-title-wrap">
+                                    <div class="patch-version-tag">
+                                        <strong>v1.0.8</strong>
+                                    </div>
+                                    <h3 class="patch-title">Siber Karanlık Arayüz & Güçlü Şifreleme</h3>
+                                </div>
+                                <span class="patch-date">📅 15 Ekim 2026</span>
+                            </div>
+
+                            <div class="patch-card-body">
+                                <div class="patch-highlight-grid">
+                                    <div class="patch-highlight-item">
+                                        <div class="item-icon">🎨</div>
+                                        <div class="item-content">
+                                            <strong>Modern ve Canlı Arayüz</strong>
+                                            <p>Gözü yormayan şık siyah-zümrüt yeşili neon arayüz, canlı bağlantı animasyonları ve kolay anlaşılır sayaçlar getirildi.</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="patch-highlight-item">
+                                        <div class="item-icon">🔒</div>
+                                        <div class="item-content">
+                                            <strong>Kırılmaz Gizlilik & Şifreleme</strong>
+                                            <p>VLESS ve TLS 1.3 güvenlik protokolleri devreye alınarak internet servis sağlayıcılarının ve sansür sistemlerinin bağlantıyı tespit etmesi imkansız hale getirildi.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
         </main>
@@ -835,6 +1103,63 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn-primary" onclick="closeLeakTestModal()">Kapat</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: YAMA NOTLARI & YENİLİKLER -->
+    <div class="modal-overlay" id="modalPatchNotes" style="display: none;">
+        <div class="modal-box patchnotes-modal-box">
+            <div class="modal-header">
+                <div>
+                    <span class="card-badge patch-badge">✨ YENİLİKLER & YAMA NOTLARI</span>
+                    <h3 id="patchNotesModalTitle">FPN v1.1.1 Yenilikleri</h3>
+                    <p class="modal-sub" id="patchNotesModalSubtitle">Bu sürümde sizin için neler değişti ve nelerin iyileştirildiğini görün.</p>
+                </div>
+                <button class="modal-close-btn" onclick="closePatchNotesModal()">✕</button>
+            </div>
+            <div class="patchnotes-modal-content" id="patchNotesModalContent">
+                <div class="modal-patch-list">
+                    <div class="modal-patch-item">
+                        <span class="modal-patch-icon">📱</span>
+                        <div>
+                            <strong>Telefon İçin Kolay İndirme (Android APK)</strong>
+                            <p>Artık telefonunuzun kamerasını ekrandaki QR koda tutarak Android uygulamasını saniyeler içinde doğrudan telefonunuza indirebilirsiniz.</p>
+                        </div>
+                    </div>
+                    <div class="modal-patch-item">
+                        <span class="modal-patch-icon">🪟</span>
+                        <div>
+                            <strong>Windows 10 & 11 Pürüzsüz Çalışma</strong>
+                            <p>Siyah pencere ve yetki sorunları giderildi. Tek tıkla sessiz, sorunsuz ve güvenli tünelleme aktif olur.</p>
+                        </div>
+                    </div>
+                    <div class="modal-patch-item">
+                        <span class="modal-patch-icon">🍏</span>
+                        <div>
+                            <strong>Apple Mac & iPhone Kararlılığı</strong>
+                            <p>Apple Silicon (M1/M2/M3) ve Intel Mac'lerde kopmalar engellendi, tam sistem entegrasyonu sağlandı.</p>
+                        </div>
+                    </div>
+                    <div class="modal-patch-item">
+                        <span class="modal-patch-icon">🐧</span>
+                        <div>
+                            <strong>Linux Tam Sistem Güvenliği</strong>
+                            <p>Tüm bilgisayarın trafiğini kapsayan tam koruma modu (TUN) ve geliştirilmiş izin sistemi devreye alındı.</p>
+                        </div>
+                    </div>
+                    <div class="modal-patch-item">
+                        <span class="modal-patch-icon">⚡</span>
+                        <div>
+                            <strong>Daha Yüksek Hız & Düşük Ping</strong>
+                            <p>Cloudflare omurgası güçlendirildi, 4K video ve sosyal medya deneyimi hızlandırıldı.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="closePatchNotesModal()">Kapat</button>
+                <button type="button" class="btn-primary" onclick="closePatchNotesModal(); switchTab('patchnotes');">📖 Tüm Sürüm Geçmişini Gör</button>
             </div>
         </div>
     </div>

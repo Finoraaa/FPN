@@ -158,7 +158,7 @@ function killSingBoxProcesses() {
 
 
 // Application Version
-let appVersion = '1.1.0';
+let appVersion = '1.1.1';
 try {
     const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
     if (pkg && pkg.version) appVersion = pkg.version;
@@ -189,6 +189,9 @@ let updateState = {
     downloadUrl: null,
     assetName: null,
     releaseNotes: '',
+    apkDownloadUrl: 'https://github.com/Finoraaa/FPN/releases/latest/download/FPN-Android.apk',
+    apkName: 'FPN-Android.apk',
+    apkSize: null,
     downloading: false,
     percent: 0,
     downloadedBytes: 0,
@@ -1654,7 +1657,10 @@ function checkGitHubUpdates() {
                     const hasUpdate = isNewerVersion(latestVer, appVersion);
 
                     let matchedAsset = null;
+                    let apkAsset = null;
                     if (Array.isArray(release.assets)) {
+                        apkAsset = release.assets.find(a => a.name.endsWith('.apk'));
+
                         let platformAssets = [];
                         if (isWin) {
                             platformAssets = release.assets.filter(a => a.name.endsWith('.exe'));
@@ -1678,12 +1684,19 @@ function checkGitHubUpdates() {
                                        platformAssets[0] || null;
                     }
 
+                    const apkDownloadUrl = apkAsset ? apkAsset.browser_download_url : 'https://github.com/Finoraaa/FPN/releases/latest/download/FPN-Android.apk';
+                    const apkName = apkAsset ? apkAsset.name : 'FPN-Android.apk';
+                    const apkSize = apkAsset && apkAsset.size ? (apkAsset.size / (1024 * 1024)).toFixed(1) + ' MB' : null;
+
                     updateState.hasUpdate = hasUpdate;
                     updateState.currentVersion = appVersion;
                     updateState.latestVersion = latestVer;
                     updateState.releaseNotes = release.body || 'Performans iyileştirmeleri ve hata düzeltmeleri.';
                     updateState.downloadUrl = matchedAsset ? matchedAsset.browser_download_url : null;
                     updateState.assetName = matchedAsset ? matchedAsset.name : null;
+                    updateState.apkDownloadUrl = apkDownloadUrl;
+                    updateState.apkName = apkName;
+                    updateState.apkSize = apkSize;
 
                     resolve({
                         hasUpdate,
@@ -1691,7 +1704,10 @@ function checkGitHubUpdates() {
                         latestVersion: latestVer,
                         releaseNotes: updateState.releaseNotes,
                         assetName: updateState.assetName,
-                        downloadUrl: updateState.downloadUrl
+                        downloadUrl: updateState.downloadUrl,
+                        apkDownloadUrl: updateState.apkDownloadUrl,
+                        apkName: updateState.apkName,
+                        apkSize: updateState.apkSize
                     });
                 } catch (e) {
                     resolve({ hasUpdate: false, currentVersion: appVersion, error: e.message });
@@ -2284,6 +2300,15 @@ const server = http.createServer(async (req, res) => {
                 } catch (e) {
                     return sendJson(500, { error: e.message });
                 }
+            }
+
+            if (pathname === '/api/mobile-apk-info' && req.method === 'GET') {
+                return sendJson(200, {
+                    apkDownloadUrl: updateState.apkDownloadUrl || 'https://github.com/Finoraaa/FPN/releases/latest/download/FPN-Android.apk',
+                    apkName: updateState.apkName || 'FPN-Android.apk',
+                    apkSize: updateState.apkSize || null,
+                    latestVersion: updateState.latestVersion || appVersion
+                });
             }
 
             return sendJson(404, { error: 'API bulunamadı' });

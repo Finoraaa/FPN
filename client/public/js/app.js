@@ -59,7 +59,8 @@ function switchTab(tabId) {
         dashboard: { title: "Ana Ekran", desc: "Bağlantı & Güvenlik Kontrolü" },
         nodes: { title: "Sunucular & Düğümler", desc: "Cloudflare Workers veya VLESS çıkış noktalarınızı yönetin ve test edin" },
         speedtest: { title: "Dahili Hız Testi", desc: "Cloudflare CDN omurgası üzerinden gerçek indirme hızı ve gecikmeyi ölçün" },
-        mobile: { title: "Mobil Cihaza Aktar (QR)", desc: "Telefonunuzla QR kodu okutarak Android veya iPhone'da tek tıkla bağlanın" },
+        mobile: { title: "Telefon İçin İndir", desc: "Telefonunuzun kamerasıyla QR kodu taratarak Android APK'sını doğrudan indirin veya kurulum rehberini izleyin" },
+        patchnotes: { title: "Yama Notları & Sürüm Günlükleri", desc: "Her güncellemede yapılan iyileştirmelerin ve yeniliklerin sade dille anlatımı" },
         donate: { title: "Geliştiriciye Destek & Bağış (donatr.ee)", desc: "FPN'in tamamen ücretsiz, sınırsız ve sansürsüz kalmasına katkıda bulunun" },
         feedback: { title: "Geri Bildirim & Topluluk", desc: "Geri bildirimleriniz ile daha iyi projeler yapacağız. Fikir ve önerilerinizi bizimle paylaşın" },
         settings: { title: "Sansür Koruması & Ayarlar", desc: "DNS over HTTPS, portlar ve Türkiye bölünmüş tünel kurallarını yapılandırın" },
@@ -72,6 +73,7 @@ function switchTab(tabId) {
     }
 
     if (tabId === 'mobile') {
+        loadMobileApkInfo();
         renderMobileQr();
     } else if (tabId === 'logs') {
         fetchLogs();
@@ -89,15 +91,25 @@ function switchTab(tabId) {
 }
 
 function switchMobileSubTab(subTab) {
-    document.querySelectorAll('.sub-tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.sub-tab-content').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('.mobile-instructions-card .sub-tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.mobile-instructions-card .sub-tab-content').forEach(c => c.classList.remove('active'));
 
     if (subTab === 'android') {
-        document.querySelector('.sub-tab-btn:nth-child(1)').classList.add('active');
-        document.getElementById('subTabAndroid').classList.add('active');
-    } else {
-        document.querySelector('.sub-tab-btn:nth-child(2)').classList.add('active');
-        document.getElementById('subTabIos').classList.add('active');
+        const btn = document.getElementById('btnSubTabAndroid');
+        const tab = document.getElementById('subTabAndroid');
+        if (btn) btn.classList.add('active');
+        if (tab) tab.classList.add('active');
+    } else if (subTab === 'ios') {
+        const btn = document.getElementById('btnSubTabIos');
+        const tab = document.getElementById('subTabIos');
+        if (btn) btn.classList.add('active');
+        if (tab) tab.classList.add('active');
+    } else if (subTab === 'vless') {
+        const btn = document.getElementById('btnSubTabVless');
+        const tab = document.getElementById('subTabVless');
+        if (btn) btn.classList.add('active');
+        if (tab) tab.classList.add('active');
+        renderMobileQr();
     }
 }
 
@@ -814,6 +826,78 @@ function testCurrentNodePing() {
     if (appState.activeNodeId) testNodePing(appState.activeNodeId);
 }
 
+// ====================================================================
+// Mobile APK Download & QR Management
+// ====================================================================
+let currentApkDownloadUrl = 'https://github.com/Finoraaa/FPN/releases/latest/download/FPN-Android.apk';
+
+async function loadMobileApkInfo() {
+    try {
+        const res = await fetch(API_BASE + '/api/mobile-apk-info');
+        const data = await res.json();
+        if (data.apkDownloadUrl) {
+            currentApkDownloadUrl = data.apkDownloadUrl;
+        }
+        renderApkDownloadQr(currentApkDownloadUrl, data.latestVersion, data.apkSize);
+    } catch (e) {
+        renderApkDownloadQr(currentApkDownloadUrl);
+    }
+}
+
+function renderApkDownloadQr(url, version, size) {
+    const qrBox = document.getElementById('apkQrCode');
+    if (!qrBox) return;
+    qrBox.innerHTML = '';
+
+    const apkUrl = url || currentApkDownloadUrl || 'https://github.com/Finoraaa/FPN/releases/latest/download/FPN-Android.apk';
+    currentApkDownloadUrl = apkUrl;
+
+    try {
+        new QRCode(qrBox, {
+            text: apkUrl,
+            width: 210,
+            height: 210,
+            colorDark: "#090d16",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.M
+        });
+    } catch (err) {
+        console.error("APK QR Render Error:", err);
+    }
+
+    if (version) {
+        const vChip = document.getElementById('apkVersionChip');
+        if (vChip) vChip.innerText = `v${version}`;
+        const fn = document.getElementById('apkFileNameText');
+        if (fn) fn.innerText = `FPN-Android.apk (v${version})`;
+    }
+    if (size) {
+        const fs = document.getElementById('apkFileSizeText');
+        if (fs) fs.innerText = `Boyut: ${size} • Android 8.0 ve Üzeri • Güvenli & Reklamsız`;
+    }
+}
+
+function copyApkDownloadLink() {
+    const url = currentApkDownloadUrl || 'https://github.com/Finoraaa/FPN/releases/latest/download/FPN-Android.apk';
+    navigator.clipboard.writeText(url).then(() => {
+        showToast("✅ Android APK indirme bağlantısı kopyalandı! Telefonunuza gönderebilir veya tarayıcınızda açabilirsiniz.");
+    }).catch(() => {
+        showToast("Bağlantı: " + url);
+    });
+}
+
+function downloadApkDirect(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    const url = currentApkDownloadUrl || 'https://github.com/Finoraaa/FPN/releases/latest/download/FPN-Android.apk';
+    fetch(API_BASE + '/api/open-external', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url })
+    }).catch(() => {});
+    window.open(url, '_blank');
+    showToast("📥 Android APK indirmesi başlatılıyor...");
+}
+
 // Mobile QR Code
 async function renderMobileQr() {
     try {
@@ -1098,6 +1182,7 @@ window.addEventListener('DOMContentLoaded', () => {
     fetchSettings();
     checkTunStatus();
     fetchIpInfo();
+    loadMobileApkInfo();
     fetchNodes().then(() => {
         fetchStatus();
         testCurrentNodePing();
@@ -1400,6 +1485,7 @@ window.addEventListener('keydown', (e) => {
         if (typeof closeImportSubModal === 'function') closeImportSubModal();
         if (typeof closeCleanIpScannerModal === 'function') closeCleanIpScannerModal();
         if (typeof closeLeakTestModal === 'function') closeLeakTestModal();
+        if (typeof closePatchNotesModal === 'function') closePatchNotesModal();
     }
 });
 
@@ -1421,6 +1507,13 @@ async function checkForAppUpdates() {
     try {
         const res = await fetch(API_BASE + '/api/check-updates');
         const data = await res.json();
+
+        // Update Android APK QR code with the latest release asset
+        if (data.apkDownloadUrl) {
+            currentApkDownloadUrl = data.apkDownloadUrl;
+            renderApkDownloadQr(data.apkDownloadUrl, data.latestVersion, data.apkSize);
+        }
+
         if (data.hasUpdate && data.latestVersion) {
             currentAppUpdate = data;
             const banner = document.getElementById('updateBanner');
@@ -1428,8 +1521,8 @@ async function checkForAppUpdates() {
             const sub = document.getElementById('updateBannerSubtitle');
             if (banner && title) {
                 title.innerText = `🚀 Yeni FPN Sürümü Mevcut: v${data.latestVersion}`;
-                if (sub && data.releaseNotes) {
-                    sub.innerText = data.releaseNotes.split('\n')[0] || "Performans ve güvenlik güncellemelerini almak için tek tıkla geçiş yapın.";
+                if (sub) {
+                    sub.innerText = "Daha yüksek hız, mobil QR indirme kolaylığı ve sistem kararlılığı için tek tıkla geçiş yapın.";
                 }
                 banner.style.display = 'flex';
             }
@@ -1512,6 +1605,24 @@ async function triggerUpdateFlow() {
 function dismissUpdateBanner() {
     const banner = document.getElementById('updateBanner');
     if (banner) banner.style.display = 'none';
+}
+
+// ====================================================================
+// Patch Notes Modal Controller
+// ====================================================================
+function openPatchNotesModal() {
+    const modal = document.getElementById('modalPatchNotes');
+    if (!modal) return;
+    if (currentAppUpdate && currentAppUpdate.latestVersion) {
+        const title = document.getElementById('patchNotesModalTitle');
+        if (title) title.innerText = `FPN v${currentAppUpdate.latestVersion} Yenilikleri`;
+    }
+    modal.style.display = 'flex';
+}
+
+function closePatchNotesModal() {
+    const modal = document.getElementById('modalPatchNotes');
+    if (modal) modal.style.display = 'none';
 }
 
 
